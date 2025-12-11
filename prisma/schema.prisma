@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  products  Product[]
-  orders    Order[]
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  name          String?
+  password      String
+  role          String         @default("USER")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  products      Product[]
+  orders        Order[]
+  courierOrders CourierOrder[]
 }
 
 model Product {
@@ -29,30 +30,45 @@ model Product {
   category    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
-  orderItems  OrderItem[]
+
+  userId     Int
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+}
+
+model CourierOrder {
+  id          Int      @id @default(autoincrement())
+  fullName    String
+  phoneNumber String
+  address     String
+  institution String
+  deliveryTo  String
+  description String?
+  status      String   @default("PENDING") // PENDING, PROCESSING, DELIVERED, CANCELLED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int? // Егер пайдаланушы тіркелген болса
+  user        User?    @relation(fields: [userId], references: [id])
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   totalAmount Float
-  status      String   @default("PENDING")
+  status      String      @default("PENDING")
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
   orderItems  OrderItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model OrderItem {
-  id        Int     @id @default(autoincrement())
+  id        Int   @id @default(autoincrement())
   quantity  Int
   price     Float
   productId Int
   orderId   Int
-  
-  product   Product @relation(fields: [productId], references: [id])
-  order     Order   @relation(fields: [orderId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id])
 }
