@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL_TEST")
 }
 
 model User {
@@ -52,14 +52,28 @@ model CourierOrder {
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
-  totalAmount Float
-  status      String      @default("PENDING")
-  userId      Int
-  user        User        @relation(fields: [userId], references: [id])
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id              Int     @id @default(autoincrement())
+  // ✅ ORDER_NUMBER қосу (тапсырыс тарихында қажет)
+  orderNumber     String  @unique @default(uuid())
+  totalAmount     Float
+  status          String  @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  shippingAddress Json? // {street, city, zip, phone}
+  paymentMethod   String  @default("CARD") // CARD, CASH, BANK_TRANSFER
+  paymentStatus   String  @default("PENDING") // PENDING, PAID, FAILED
+  notes           String?
+
+  userId     Int
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Индекс қосу (іздеуге жеңіл болу үшін)
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model OrderItem {

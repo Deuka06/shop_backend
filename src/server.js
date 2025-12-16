@@ -1,14 +1,15 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const cookieParser = require('cookie-parser');
-const compression = require('compression');
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./../config/swagger');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
+const compression = require("compression");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./../config/swagger");
+const orderHistoryRoutes = require("./routes/orderHistoryRoutes");
 
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const app = express();
@@ -18,18 +19,18 @@ app.use(helmet());
 app.use(compression());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
   })
 );
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Swagger UI
 app.use(
-  '/api-docs',
+  "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     swaggerOptions: {
@@ -39,19 +40,20 @@ app.use(
 );
 
 // Маршруттар
-app.use('/api/v1/auth', require('./routes/authRoutes'));
-app.use('/api/v1/products', require('./routes/productRoutes'));
-app.use('/api/v1/courier', require('./routes/courierRoutes'));
+app.use("/api/v1/auth", require("./routes/authRoutes"));
+app.use("/api/v1/products", require("./routes/productRoutes"));
+app.use("/api/orders", orderHistoryRoutes);
+app.use("/api/v1/courier", require("./routes/courierRoutes"));
 
 // Негізгі маршрут
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.json({
-    message: 'E-commerce Backend API',
-    version: '1.0.0',
-    docs: '/api-docs',
+    message: "E-commerce Backend API",
+    version: "1.0.0",
+    docs: "/api-docs",
     endpoints: {
-      auth: '/api/v1/auth',
-      products: '/api/v1/products',
+      auth: "/api/v1/auth",
+      products: "/api/v1/products",
     },
   });
 });
@@ -60,7 +62,7 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Маршрут табылмады',
+    message: "Маршрут табылмады",
   });
 });
 
@@ -69,12 +71,12 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
 
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Ішкі сервер қатесі';
+  const message = err.message || "Ішкі сервер қатесі";
 
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 });
 
@@ -82,9 +84,9 @@ app.use((err, req, res, next) => {
 async function connectDB() {
   try {
     await prisma.$connect();
-    console.log('✅ PostgreSQL базасына қосылды');
+    console.log("✅ PostgreSQL базасына қосылды");
   } catch (error) {
-    console.error('❌ Базаға қосылу қатесі:', error);
+    console.error("❌ Базаға қосылу қатесі:", error);
     process.exit(1);
   }
 }
@@ -99,9 +101,9 @@ app.listen(PORT, async () => {
 });
 
 // Graceful shutdown
-process.on('SIGINT', async () => {
+process.on("SIGINT", async () => {
   await prisma.$disconnect();
-  console.log('🛑 Базадан ажырады');
+  console.log("🛑 Базадан ажырады");
   process.exit(0);
 });
 

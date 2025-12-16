@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { body } = require('express-validator');
-const productController = require('../controllers/productController');
-const { authenticate, authorize } = require('../middlewares/auth');
+const { body } = require("express-validator");
+const productController = require("../controllers/productController");
+const { authenticate, authorize } = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -45,7 +45,7 @@ const { authenticate, authorize } = require('../middlewares/auth');
 
 /**
  * @swagger
- * /api/v1/products:
+ * /products:
  *   get:
  *     summary: Барлық өнімдерді алу
  *     tags: [Products]
@@ -83,11 +83,11 @@ const { authenticate, authorize } = require('../middlewares/auth');
  *                   items:
  *                     $ref: '#/components/schemas/Product'
  */
-router.get('/', productController.getAllProducts);
+router.get("/", productController.getAllProducts);
 
 /**
  * @swagger
- * /api/v1/products/{id}:
+ * /products/{id}:
  *   get:
  *     summary: Бір өнімді алу
  *     tags: [Products]
@@ -112,11 +112,11 @@ router.get('/', productController.getAllProducts);
  *       404:
  *         description: Өнім табылмады
  */
-router.get('/:id', productController.getProductById);
+router.get("/:id", productController.getProductById);
 
 /**
  * @swagger
- * /api/v1/products:
+ * /products:
  *   post:
  *     summary: Жаңа өнім қосу
  *     tags: [Products]
@@ -142,22 +142,22 @@ router.get('/:id', productController.getProductById);
  *                   $ref: '#/components/schemas/Product'
  */
 router.post(
-  '/',
+  "/",
   authenticate,
   [
-    body('name').notEmpty().withMessage('Өнім атын енгізіңіз'),
-    body('price')
+    body("name").notEmpty().withMessage("Өнім атын енгізіңіз"),
+    body("price")
       .isFloat({ gt: 0 })
-      .withMessage('Баға нөлден үлкен болуы керек'),
-    body('stock').optional().isInt({ min: 0 }),
-    body('category').optional().notEmpty(),
+      .withMessage("Баға нөлден үлкен болуы керек"),
+    body("stock").optional().isInt({ min: 0 }),
+    body("category").optional().notEmpty(),
   ],
   productController.createProduct
 );
 
 /**
  * @swagger
- * /api/v1/products/{id}:
+ * /products/{id}:
  *   put:
  *     summary: Өнімді жаңарту
  *     tags: [Products]
@@ -179,11 +179,11 @@ router.post(
  *       200:
  *         description: Өнім сәтті жаңартылды
  */
-router.put('/:id', authenticate, productController.updateProduct);
+router.put("/:id", authenticate, productController.updateProduct);
 
 /**
  * @swagger
- * /api/v1/products/{id}:
+ * /products/{id}:
  *   delete:
  *     summary: Өнімді жою
  *     tags: [Products]
@@ -202,9 +202,9 @@ router.put('/:id', authenticate, productController.updateProduct);
  *         description: Рұқсат жоқ
  */
 router.delete(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize('ADMIN'),
+  authorize("ADMIN"),
   productController.deleteProduct
 );
 

@@ -1,30 +1,30 @@
-const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerJsdoc = require("swagger-jsdoc");
 
 const options = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'E-commerce API',
-      version: '1.0.0',
-      description: 'Онлайн дүкен Backend API',
+      title: "E-commerce API",
+      version: "1.0.0",
+      description: "Онлайн дүкен Backend API",
       contact: {
-        name: 'API Support',
-        email: 'support@ecommerce.com',
+        name: "API Support",
+        email: "support@ecommerce.com",
       },
     },
     servers: [
       {
-        url: 'http://localhost:8080/api/v1',
-        description: 'Development Server',
+        url: "http://localhost:3000/api/v1",
+        description: "Development Server",
       },
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'JWT токеніңізді енгізіңіз. Формат: Bearer <token>',
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "JWT токеніңізді енгізіңіз. Формат: Bearer <token>",
         },
       },
     },
@@ -34,7 +34,7 @@ const options = {
       },
     ],
   },
-  apis: ['./routes/*.js'], // Swagger комментарийлері бар файлдар
+  apis: ["./routes/*.js"], // Swagger комментарийлері бар файлдар
 };
 
 const swaggerSpec = swaggerJsdoc(options);

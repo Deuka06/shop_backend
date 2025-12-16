@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { body } = require('express-validator');
-const authController = require('../controllers/authController');
-const { authenticate } = require('../middlewares/auth');
+const { body } = require("express-validator");
+const authController = require("../controllers/authController");
+const { authenticate } = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -46,7 +46,7 @@ const { authenticate } = require('../middlewares/auth');
 
 /**
  * @swagger
- * /api/v1/auth/register:
+ * /auth/register:
  *   post:
  *     summary: Жаңа пайдаланушыны тіркеу
  *     tags: [Authentication]
@@ -67,20 +67,20 @@ const { authenticate } = require('../middlewares/auth');
  *         description: Қате деректер
  */
 router.post(
-  '/register',
+  "/register",
   [
-    body('email').isEmail().withMessage('Жарамды email енгізіңіз'),
-    body('password')
+    body("email").isEmail().withMessage("Жарамды email енгізіңіз"),
+    body("password")
       .isLength({ min: 6 })
-      .withMessage('Пароль 6 таңбадан кем емес болуы керек'),
-    body('name').notEmpty().withMessage('Атыңызды енгізіңіз'),
+      .withMessage("Пароль 6 таңбадан кем емес болуы керек"),
+    body("name").notEmpty().withMessage("Атыңызды енгізіңіз"),
   ],
   authController.register
 );
 
 /**
  * @swagger
- * /api/v1/auth/login:
+ * /auth/login:
  *   post:
  *     summary: Жүйеге кіру
  *     tags: [Authentication]
@@ -111,17 +111,17 @@ router.post(
  *         description: Қате email немесе пароль
  */
 router.post(
-  '/login',
+  "/login",
   [
-    body('email').isEmail().withMessage('Жарамды email енгізіңіз'),
-    body('password').notEmpty().withMessage('Пароль енгізіңіз'),
+    body("email").isEmail().withMessage("Жарамды email енгізіңіз"),
+    body("password").notEmpty().withMessage("Пароль енгізіңіз"),
   ],
   authController.login
 );
 
 /**
  * @swagger
- * /api/v1/auth/logout:
+ * /auth/logout:
  *   post:
  *     summary: Жүйеден шығу
  *     tags: [Authentication]
@@ -131,11 +131,11 @@ router.post(
  *       200:
  *         description: Шығу сәтті
  */
-router.post('/logout', authenticate, authController.logout);
+router.post("/logout", authenticate, authController.logout);
 
 /**
  * @swagger
- * /api/v1/auth/profile:
+ * /auth/profile:
  *   get:
  *     summary: Пайдаланушы профилін алу
  *     tags: [Authentication]
@@ -154,6 +154,6 @@ router.post('/logout', authenticate, authController.logout);
  *                 user:
  *                   $ref: '#/components/schemas/User'
  */
-router.get('/profile', authenticate, authController.getProfile);
+router.get("/profile", authenticate, authController.getProfile);
 
 module.exports = router;

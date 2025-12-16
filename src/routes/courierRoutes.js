@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { body, param } = require('express-validator');
-const courierController = require('../controllers/courierController');
-const { authenticate, authorize } = require('../middlewares/auth');
+const { body, param } = require("express-validator");
+const courierController = require("../controllers/courierController");
+const { authenticate, authorize } = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -69,7 +69,7 @@ const { authenticate, authorize } = require('../middlewares/auth');
 
 /**
  * @swagger
- * /api/v1/courier/institutions:
+ * /courier/institutions:
  *   get:
  *     summary: Мекемелер тізімін алу (Dropdown үшін)
  *     tags: [Courier]
@@ -90,11 +90,11 @@ const { authenticate, authorize } = require('../middlewares/auth');
  *                   items:
  *                     $ref: '#/components/schemas/Institution'
  */
-router.get('/institutions', courierController.getInstitutions);
+router.get("/institutions", courierController.getInstitutions);
 
 /**
  * @swagger
- * /api/v1/courier/orders:
+ * /courier/orders:
  *   post:
  *     summary: Жаңа курьер тапсырысын жасау
  *     tags: [Courier]
@@ -139,20 +139,20 @@ router.get('/institutions', courierController.getInstitutions);
  *                   $ref: '#/components/schemas/CourierOrder'
  */
 router.post(
-  '/orders',
+  "/orders",
   [
-    body('fullName').notEmpty().withMessage('Аты-жөніңізді енгізіңіз'),
-    body('phoneNumber').notEmpty().withMessage('Телефон нөміріңізді енгізіңіз'),
-    body('address').notEmpty().withMessage('Мекен-жайыңызды енгізіңіз'),
-    body('institution').notEmpty().withMessage('Мекемені таңдаңыз'),
-    body('deliveryTo').notEmpty().withMessage('Кабылдаушының атын енгізіңіз'),
+    body("fullName").notEmpty().withMessage("Аты-жөніңізді енгізіңіз"),
+    body("phoneNumber").notEmpty().withMessage("Телефон нөміріңізді енгізіңіз"),
+    body("address").notEmpty().withMessage("Мекен-жайыңызды енгізіңіз"),
+    body("institution").notEmpty().withMessage("Мекемені таңдаңыз"),
+    body("deliveryTo").notEmpty().withMessage("Кабылдаушының атын енгізіңіз"),
   ],
   courierController.createCourierOrder
 );
 
 /**
  * @swagger
- * /api/v1/courier/orders/my:
+ * /courier/orders/my:
  *   get:
  *     summary: Менің курьер тапсырыстарым
  *     tags: [Courier]
@@ -173,11 +173,11 @@ router.post(
  *       200:
  *         description: Менің тапсырыстарым
  */
-router.get('/orders/my', authenticate, courierController.getMyCourierOrders);
+router.get("/orders/my", authenticate, courierController.getMyCourierOrders);
 
 /**
  * @swagger
- * /api/v1/courier/orders:
+ * /courier/orders:
  *   get:
  *     summary: Барлық курьер тапсырыстарын алу (Admin)
  *     tags: [Courier]
@@ -235,15 +235,15 @@ router.get('/orders/my', authenticate, courierController.getMyCourierOrders);
  *                     $ref: '#/components/schemas/CourierOrder'
  */
 router.get(
-  '/orders',
+  "/orders",
   authenticate,
-  authorize('ADMIN'),
+  authorize("ADMIN"),
   courierController.getAllCourierOrders
 );
 
 /**
  * @swagger
- * /api/v1/courier/orders/{id}:
+ * /courier/orders/{id}:
  *   get:
  *     summary: Бір тапсырысты алу
  *     tags: [Courier]
@@ -259,11 +259,11 @@ router.get(
  *       200:
  *         description: Тапсырыс деректері
  */
-router.get('/orders/:id', authenticate, courierController.getCourierOrderById);
+router.get("/orders/:id", authenticate, courierController.getCourierOrderById);
 
 /**
  * @swagger
- * /api/v1/courier/orders/{id}/status:
+ * /courier/orders/{id}/status:
  *   patch:
  *     summary: Тапсырыс статусын жаңарту (Admin)
  *     tags: [Courier]
@@ -286,19 +286,19 @@ router.get('/orders/:id', authenticate, courierController.getCourierOrderById);
  *         description: Статус жаңартылды
  */
 router.patch(
-  '/orders/:id/status',
+  "/orders/:id/status",
   authenticate,
-  authorize('ADMIN'),
+  authorize("ADMIN"),
   [
-    param('id').isInt(),
-    body('status').isIn(['PENDING', 'PROCESSING', 'DELIVERED', 'CANCELLED']),
+    param("id").isInt(),
+    body("status").isIn(["PENDING", "PROCESSING", "DELIVERED", "CANCELLED"]),
   ],
   courierController.updateOrderStatus
 );
 
 /**
  * @swagger
- * /api/v1/courier/orders/{id}:
+ * /courier/orders/{id}:
  *   delete:
  *     summary: Тапсырысты жою (Admin)
  *     tags: [Courier]
@@ -315,9 +315,9 @@ router.patch(
  *         description: Тапсырыс жойылды
  */
 router.delete(
-  '/orders/:id',
+  "/orders/:id",
   authenticate,
-  authorize('ADMIN'),
+  authorize("ADMIN"),
   courierController.deleteCourierOrder
 );
 
