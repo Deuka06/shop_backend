@@ -90,7 +90,7 @@ async function connectDB() {
 }
 
 // Серверді іске қосу
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   await connectDB();
   console.log(`✅ Сервер ${PORT} портында іске қосылды`);
