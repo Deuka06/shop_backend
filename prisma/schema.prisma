@@ -8,68 +8,134 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique
-  name          String?
-  password      String
-  role          String         @default("USER")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Байланыстар
   products      Product[]
   orders        Order[]
   courierOrders CourierOrder[]
   categories    Category[]
+  packages      Package[] // ✅ ЖАҢА: Пайдаланушының посылкалары
+
+  @@map("users")
 }
 
 model Product {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
   price       Float
-  stock       Int       @default(0)
+  stock       Int      @default(0)
   image       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  // Байланыстар
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  
-  orderItems  OrderItem[]
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 
+  orderItems   OrderItem[]
+  packageItems PackageItem[] // ✅ ЖАҢА: Өнім қай посылкаларда бар
+
+  // Индекс қосу
   @@index([categoryId])
   @@index([userId])
+  @@map("products")
 }
 
 model Category {
-  id              Int       @id @default(autoincrement())
-  name            String    @db.VarChar(100)
-  description     String?   @db.Text
-  slug            String    @unique @db.VarChar(100)
+  id              Int      @id @default(autoincrement())
+  name            String   @db.VarChar(100)
+  description     String?  @db.Text
+  slug            String   @unique @db.VarChar(100)
   parentId        Int?
-  isActive        Boolean   @default(true)
-  imageUrl        String?   @db.VarChar(255)
-  metaTitle       String?   @db.VarChar(70)
-  metaDescription String?   @db.VarChar(160)
-  displayOrder    Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  parent          Category? @relation("CategoryToParent", fields: [parentId], references: [id])
-  children        Category[] @relation("CategoryToParent")
-  
-  userId          Int?
-  user            User?     @relation(fields: [userId], references: [id])
-  
-  products        Product[]
-  
+  isActive        Boolean  @default(true)
+  imageUrl        String?  @db.VarChar(255)
+  metaTitle       String?  @db.VarChar(70)
+  metaDescription String?  @db.VarChar(160)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Байланыстар
+  parent   Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToParent")
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  products Product[]
+  packages Package[] // ✅ ЖАҢА: Категорияның посылкалары
+
+  // Индекс қосу
   @@index([parentId])
   @@index([slug])
   @@index([isActive])
   @@index([displayOrder])
   @@index([createdAt])
+  @@map("categories")
+}
+
+model Package {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Float
+  originalPrice Float?
+  image         String?
+  isActive      Boolean  @default(true)
+  stock         Int      @default(0)
+  weight        Float?
+  dimensions    String?
+  tags          String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Байланыстар
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  items      PackageItem[]
+  orderItems OrderItem[] // ✅ OrderItem-мен байланыс
+
+  // Индекс қосу
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("packages")
+}
+
+model PackageItem {
+  id          Int      @id @default(autoincrement())
+  quantity    Int      @default(1)
+  customPrice Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Байланыстар
+  packageId Int
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  // Индекс қосу
+  @@unique([packageId, productId])
+  @@index([packageId])
+  @@index([productId])
+  @@map("package_items")
 }
 
 model CourierOrder {
@@ -83,46 +149,61 @@ model CourierOrder {
   status      String   @default("PENDING")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  userId      Int?
-  user        User?    @relation(fields: [userId], references: [id])
-  
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
   @@index([userId])
   @@index([status])
+  @@map("courier_orders")
 }
 
 model Order {
-  id              Int     @id @default(autoincrement())
-  orderNumber     String  @unique @default(uuid())
+  id              Int      @id @default(autoincrement())
+  orderNumber     String   @unique @default(uuid())
   totalAmount     Float
-  status          String  @default("PENDING")
+  status          String   @default("PENDING")
   shippingAddress Json?
-  paymentMethod   String  @default("CARD")
-  paymentStatus   String  @default("PENDING")
+  paymentMethod   String   @default("CARD")
+  paymentStatus   String   @default("PENDING")
   notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
+  // Байланыстар
   userId     Int
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  // Индекс қосу
   @@index([userId])
   @@index([orderNumber])
   @@index([status])
   @@index([createdAt])
+  @@map("orders")
 }
 
 model OrderItem {
-  id        Int   @id @default(autoincrement())
-  quantity  Int
-  price     Float
-  productId Int
-  orderId   Int
+  id       Int   @id @default(autoincrement())
+  quantity Int
+  price    Float
 
-  product Product @relation(fields: [productId], references: [id])
-  order   Order   @relation(fields: [orderId], references: [id])
-  
+  // Product НЕМЕСЕ Package болуы мүмкін
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  packageId Int?
+  package   Package? @relation(fields: [packageId], references: [id])
+
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Типті анықтау
+  itemType String @default("PRODUCT") // "PRODUCT" немесе "PACKAGE"
+
+  // Индекс қосу
   @@index([productId])
+  @@index([packageId])
   @@index([orderId])
+  @@map("order_items")
 }
