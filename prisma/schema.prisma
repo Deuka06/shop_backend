@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_TEST")
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -18,22 +18,58 @@ model User {
   products      Product[]
   orders        Order[]
   courierOrders CourierOrder[]
+  categories    Category[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
   price       Float
-  stock       Int      @default(0)
+  stock       Int       @default(0)
   image       String?
-  category    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  userId     Int
-  user       User        @relation(fields: [userId], references: [id])
-  orderItems OrderItem[]
+  categoryId  Int?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  
+  orderItems  OrderItem[]
+
+  @@index([categoryId])
+  @@index([userId])
+}
+
+model Category {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(100)
+  description     String?   @db.Text
+  slug            String    @unique @db.VarChar(100)
+  parentId        Int?
+  isActive        Boolean   @default(true)
+  imageUrl        String?   @db.VarChar(255)
+  metaTitle       String?   @db.VarChar(70)
+  metaDescription String?   @db.VarChar(160)
+  displayOrder    Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  parent          Category? @relation("CategoryToParent", fields: [parentId], references: [id])
+  children        Category[] @relation("CategoryToParent")
+  
+  userId          Int?
+  user            User?     @relation(fields: [userId], references: [id])
+  
+  products        Product[]
+  
+  @@index([parentId])
+  @@index([slug])
+  @@index([isActive])
+  @@index([displayOrder])
+  @@index([createdAt])
 }
 
 model CourierOrder {
@@ -44,22 +80,24 @@ model CourierOrder {
   institution String
   deliveryTo  String
   description String?
-  status      String   @default("PENDING") // PENDING, PROCESSING, DELIVERED, CANCELLED
+  status      String   @default("PENDING")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  userId      Int? // Егер пайдаланушы тіркелген болса
+  userId      Int?
   user        User?    @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([status])
 }
 
 model Order {
   id              Int     @id @default(autoincrement())
-  // ✅ ORDER_NUMBER қосу (тапсырыс тарихында қажет)
   orderNumber     String  @unique @default(uuid())
   totalAmount     Float
-  status          String  @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
-  shippingAddress Json? // {street, city, zip, phone}
-  paymentMethod   String  @default("CARD") // CARD, CASH, BANK_TRANSFER
-  paymentStatus   String  @default("PENDING") // PENDING, PAID, FAILED
+  status          String  @default("PENDING")
+  shippingAddress Json?
+  paymentMethod   String  @default("CARD")
+  paymentStatus   String  @default("PENDING")
   notes           String?
 
   userId     Int
@@ -69,7 +107,6 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Индекс қосу (іздеуге жеңіл болу үшін)
   @@index([userId])
   @@index([orderNumber])
   @@index([status])
@@ -85,4 +122,7 @@ model OrderItem {
 
   product Product @relation(fields: [productId], references: [id])
   order   Order   @relation(fields: [orderId], references: [id])
+  
+  @@index([productId])
+  @@index([orderId])
 }

@@ -1,47 +1,8 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { body } = require("express-validator");
-const productController = require("../controllers/productController");
-const { authenticate, authorize } = require("../middlewares/auth");
-
-/**
- * @swagger
- * tags:
- *   name: Products
- *   description: Өнімдерді басқару API
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Product:
- *       type: object
- *       required:
- *         - name
- *         - price
- *       properties:
- *         id:
- *           type: integer
- *         name:
- *           type: string
- *         description:
- *           type: string
- *         price:
- *           type: number
- *           format: float
- *         stock:
- *           type: integer
- *         category:
- *           type: string
- *         image:
- *           type: string
- *         userId:
- *           type: integer
- *         createdAt:
- *           type: string
- *           format: date-time
- */
+const { body, param } = require('express-validator');
+const productController = require('../controllers/productController');
+const { authenticate, authorize } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -61,29 +22,62 @@ const { authenticate, authorize } = require("../middlewares/auth");
  *           type: integer
  *           default: 10
  *       - in: query
- *         name: category
+ *         name: categoryId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: categorySlug
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: inStock
+ *         schema:
+ *           type: boolean
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [createdAt, price, name]
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
  *     responses:
  *       200:
  *         description: Өнімдер тізімі
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
  */
-router.get("/", productController.getAllProducts);
+router.get('/', productController.getAllProducts);
+
+/**
+ * @swagger
+ * /products/category/{slug}:
+ *   get:
+ *     summary: Категория бойынша өнімдерді алу
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Категория өнімдері
+ */
+router.get('/category/:slug', productController.getProductsByCategory);
 
 /**
  * @swagger
@@ -100,19 +94,8 @@ router.get("/", productController.getAllProducts);
  *     responses:
  *       200:
  *         description: Өнім деректері
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/Product'
- *       404:
- *         description: Өнім табылмады
  */
-router.get("/:id", productController.getProductById);
+router.get('/:id', productController.getProductById);
 
 /**
  * @swagger
@@ -127,30 +110,38 @@ router.get("/:id", productController.getProductById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               stock:
+ *                 type: integer
+ *               categoryId:
+ *                 type: integer
+ *               image:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Өнім сәтті қосылды
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/Product'
  */
 router.post(
-  "/",
+  '/',
   authenticate,
+  authorize(['ADMIN', 'SELLER']),
   [
-    body("name").notEmpty().withMessage("Өнім атын енгізіңіз"),
-    body("price")
+    body('name').notEmpty().withMessage('Өнім атауын енгізіңіз'),
+    body('price')
       .isFloat({ gt: 0 })
-      .withMessage("Баға нөлден үлкен болуы керек"),
-    body("stock").optional().isInt({ min: 0 }),
-    body("category").optional().notEmpty(),
+      .withMessage('Баға 0-ден үлкен болуы керек'),
+    body('stock').optional().isInt({ min: 0 }),
+    body('categoryId').optional().isInt(),
   ],
   productController.createProduct
 );
@@ -174,12 +165,37 @@ router.post(
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               stock:
+ *                 type: integer
+ *               categoryId:
+ *                 type: integer
+ *               image:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Өнім сәтті жаңартылды
  */
-router.put("/:id", authenticate, productController.updateProduct);
+router.put(
+  '/:id',
+  authenticate,
+  authorize(['ADMIN', 'SELLER']),
+  [
+    param('id').isInt(),
+    body('name').optional().notEmpty(),
+    body('price').optional().isFloat({ gt: 0 }),
+    body('stock').optional().isInt({ min: 0 }),
+    body('categoryId').optional().isInt(),
+  ],
+  productController.updateProduct
+);
 
 /**
  * @swagger
@@ -197,14 +213,13 @@ router.put("/:id", authenticate, productController.updateProduct);
  *           type: integer
  *     responses:
  *       200:
- *         description: Өнім сәтті жойылды
- *       403:
- *         description: Рұқсат жоқ
+ *         description: Өнім жойылды
  */
 router.delete(
-  "/:id",
+  '/:id',
   authenticate,
-  authorize("ADMIN"),
+  authorize('ADMIN'),
+  [param('id').isInt()],
   productController.deleteProduct
 );
 
