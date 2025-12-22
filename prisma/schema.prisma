@@ -22,49 +22,49 @@ model User {
 }
 
 model Product {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
   price       Float
-  stock       Int       @default(0)
+  stock       Int      @default(0)
   image       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  
-  orderItems  OrderItem[]
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  orderItems OrderItem[]
 
   @@index([categoryId])
   @@index([userId])
 }
 
 model Category {
-  id              Int       @id @default(autoincrement())
-  name            String    @db.VarChar(100)
-  description     String?   @db.Text
-  slug            String    @unique @db.VarChar(100)
+  id              Int      @id @default(autoincrement())
+  name            String   @db.VarChar(100)
+  description     String?  @db.Text
+  slug            String   @unique @db.VarChar(100)
   parentId        Int?
-  isActive        Boolean   @default(true)
-  imageUrl        String?   @db.VarChar(255)
-  metaTitle       String?   @db.VarChar(70)
-  metaDescription String?   @db.VarChar(160)
-  displayOrder    Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  parent          Category? @relation("CategoryToParent", fields: [parentId], references: [id])
-  children        Category[] @relation("CategoryToParent")
-  
-  userId          Int?
-  user            User?     @relation(fields: [userId], references: [id])
-  
-  products        Product[]
-  
+  isActive        Boolean  @default(true)
+  imageUrl        String?  @db.VarChar(255)
+  metaTitle       String?  @db.VarChar(70)
+  metaDescription String?  @db.VarChar(160)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToParent")
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  products Product[]
+
   @@index([parentId])
   @@index([slug])
   @@index([isActive])
@@ -85,7 +85,7 @@ model CourierOrder {
   updatedAt   DateTime @updatedAt
   userId      Int?
   user        User?    @relation(fields: [userId], references: [id])
-  
+
   @@index([userId])
   @@index([status])
 }
@@ -122,7 +122,7 @@ model OrderItem {
 
   product Product @relation(fields: [productId], references: [id])
   order   Order   @relation(fields: [orderId], references: [id])
-  
+
   @@index([productId])
   @@index([orderId])
 }
