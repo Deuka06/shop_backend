@@ -93,11 +93,11 @@ async function connectDB() {
 
 // Серверді іске қосу
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
+app.listen(PORT, "0.0.0.0", async () => {
   await connectDB();
   console.log(`✅ Сервер ${PORT} портында іске қосылды`);
-  console.log(`🌐 http://localhost:${PORT}`);
-  console.log(`📚 API документация: http://localhost:${PORT}/api-docs`);
+  console.log(`🌐 http://0.0.0.0:${PORT}`);
+  console.log(`📚 API документация: /api-docs`);
 });
 
 // Graceful shutdown
