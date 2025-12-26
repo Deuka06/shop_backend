@@ -1,5 +1,10 @@
 const swaggerJsdoc = require("swagger-jsdoc");
 
+const isProduction = process.env.NODE_ENV === "production";
+const serverUrl = isProduction
+  ? "https://194.32.142.105/api/v1" // Production
+  : "http://localhost:3000/api/v1"; // Development
+
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -14,8 +19,16 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api/v1",
-        description: "Development Server",
+        url: serverUrl, // ӨЗГЕРТІЛДІ
+        description: isProduction ? "Production Server" : "Development Server",
+      },
+      {
+        url: "http://194.32.142.105:3000/api/v1", // Тікелей HTTP порты
+        description: "Direct HTTP Access",
+      },
+      {
+        url: "https://194.32.142.105/api/v1", // Nginx HTTPS арқылы
+        description: "HTTPS Access (Nginx)",
       },
     ],
     components: {
@@ -34,7 +47,7 @@ const options = {
       },
     ],
   },
-  apis: ["./routes/*.js"], // Swagger комментарийлері бар файлдар
+  apis: ["./routes/*.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
