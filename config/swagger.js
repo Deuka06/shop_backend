@@ -19,8 +19,13 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api/v1/",
+<<<<<<< HEAD
+        url: "http://localhost:3000/api/v1",
         description: "Development Server",
+=======
+        url: 'http://localhost:3000/',
+        description: 'Development Server',
+>>>>>>> 45419a03ee6667dde46943c4bb77b6f57ea9e063
       },
     ],
     components: {
