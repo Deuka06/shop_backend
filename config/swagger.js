@@ -19,16 +19,8 @@ const options = {
     },
     servers: [
       {
-        url: serverUrl, // ӨЗГЕРТІЛДІ
-        description: isProduction ? "Production Server" : "Development Server",
-      },
-      {
-        url: "http://194.32.142.105:3000/api/v1", // Тікелей HTTP порты
-        description: "Direct HTTP Access",
-      },
-      {
-        url: "https://194.32.142.105/api/v1", // Nginx HTTPS арқылы
-        description: "HTTPS Access (Nginx)",
+        url: "http://localhost:3000/api/v1/",
+        description: "Development Server",
       },
     ],
     components: {
