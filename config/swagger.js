@@ -1,9 +1,5 @@
 const swaggerJsdoc = require("swagger-jsdoc");
-
-const isProduction = process.env.NODE_ENV === "production";
-const serverUrl = isProduction
-  ? "https://194.32.142.105/api/v1" // Production
-  : "http://localhost:3000/api/v1"; // Development
+const path = require("path");
 
 const options = {
   definition: {
@@ -19,13 +15,12 @@ const options = {
     },
     servers: [
       {
-<<<<<<< HEAD
+        url: "http://194.32.142.105/api/v1",
+        description: "Production Server",
+      },
+      {
         url: "http://localhost:3000/api/v1",
         description: "Development Server",
-=======
-        url: 'http://localhost:3000/',
-        description: 'Development Server',
->>>>>>> 45419a03ee6667dde46943c4bb77b6f57ea9e063
       },
     ],
     components: {
@@ -44,7 +39,7 @@ const options = {
       },
     ],
   },
-  apis: ["./routes/*.js"],
+  apis: [path.join(process.cwd(), "src", "routes", "*.js")],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

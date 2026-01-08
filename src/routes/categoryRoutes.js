@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { body, param } = require('express-validator');
-const categoryController = require('../controllers/categoryController');
-const { authenticate, authorize } = require('../middlewares/auth');
+const { body, param } = require("express-validator");
+const categoryController = require("../controllers/categoryController");
+const { authenticate, authorize } = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -17,34 +17,24 @@ const { authenticate, authorize } = require('../middlewares/auth');
  *   get:
  *     summary: Барлық категорияларды алу
  *     tags: [Categories]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *       - in: query
- *         name: isActive
- *         schema:
- *           type: boolean
- *       - in: query
- *         name: parentId
- *         schema:
- *           type: integer
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
  *     responses:
  *       200:
- *         description: Категориялар тізімі
+ *         description: Категориялар тізімі сәтті алынды
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   categoryName:
+ *                     type: string
+ *                     example: "Электроника"
  */
-router.get('/', categoryController.getAllCategories);
+router.get("/", categoryController.getAllCategories);
 
 /**
  * @swagger
@@ -56,7 +46,7 @@ router.get('/', categoryController.getAllCategories);
  *       200:
  *         description: Категориялар ағашы
  */
-router.get('/tree', categoryController.getCategoryTree);
+router.get("/tree", categoryController.getCategoryTree);
 
 /**
  * @swagger
@@ -73,41 +63,41 @@ router.get('/tree', categoryController.getCategoryTree);
  *           schema:
  *             type: object
  *             required:
- *               - name
+ *               - categoryName
  *             properties:
- *               name:
+ *               categoryName:
  *                 type: string
+ *                 example: "Электроника"
  *               description:
  *                 type: string
+ *                 example: "Тұрмыстық техника және гаджеттер"
  *               parentId:
  *                 type: integer
+ *                 nullable: true
+ *                 example: null
  *               isActive:
  *                 type: boolean
- *               imageUrl:
- *                 type: string
- *               metaTitle:
- *                 type: string
- *               metaDescription:
- *                 type: string
+ *                 example: true
  *               displayOrder:
  *                 type: integer
+ *                 example: 1
  *     responses:
  *       201:
  *         description: Категория сәтті құрылды
  */
 router.post(
-  '/',
+  "/",
   authenticate,
-  authorize('ADMIN'),
+  authorize("ADMIN"),
   [
-    body('name').notEmpty().withMessage('Категория атауын енгізіңіз'),
-    body('description').optional(),
-    body('parentId').optional().isInt(),
-    body('isActive').optional().isBoolean(),
-    body('imageUrl').optional().isURL(),
-    body('metaTitle').optional(),
-    body('metaDescription').optional(),
-    body('displayOrder').optional().isInt(),
+    body("categoryName").notEmpty().withMessage("Категория атауын енгізіңіз"),
+    body("description").optional(),
+    body("parentId").optional().isInt(),
+    body("isActive").optional().isBoolean(),
+    body("imageUrl").optional().isURL(),
+    body("metaTitle").optional(),
+    body("metaDescription").optional(),
+    body("displayOrder").optional().isInt(),
   ],
   categoryController.createCategory
 );
@@ -129,8 +119,8 @@ router.post(
  *         description: Категория деректері
  */
 router.get(
-  '/:id',
-  [param('id').isInt().withMessage('Категория ID бүтін сан болуы керек')],
+  "/:id",
+  [param("id").isInt().withMessage("Категория ID бүтін сан болуы керек")],
   categoryController.getCategoryById
 );
 
@@ -176,19 +166,19 @@ router.get(
  *         description: Категория сәтті жаңартылды
  */
 router.put(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize('ADMIN'),
+  authorize("ADMIN"),
   [
-    param('id').isInt().withMessage('Категория ID бүтін сан болуы керек'),
-    body('name').optional().notEmpty(),
-    body('description').optional(),
-    body('parentId').optional().isInt(),
-    body('isActive').optional().isBoolean(),
-    body('imageUrl').optional().isURL(),
-    body('metaTitle').optional(),
-    body('metaDescription').optional(),
-    body('displayOrder').optional().isInt(),
+    param("id").isInt().withMessage("Категория ID бүтін сан болуы керек"),
+    body("name").optional().notEmpty(),
+    body("description").optional(),
+    body("parentId").optional().isInt(),
+    body("isActive").optional().isBoolean(),
+    body("imageUrl").optional().isURL(),
+    body("metaTitle").optional(),
+    body("metaDescription").optional(),
+    body("displayOrder").optional().isInt(),
   ],
   categoryController.updateCategory
 );
@@ -212,10 +202,10 @@ router.put(
  *         description: Категория жойылды
  */
 router.delete(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize('ADMIN'),
-  [param('id').isInt().withMessage('Категория ID бүтін сан болуы керек')],
+  authorize("ADMIN"),
+  [param("id").isInt().withMessage("Категория ID бүтін сан болуы керек")],
   categoryController.deleteCategory
 );
 
@@ -249,10 +239,10 @@ router.delete(
  *         description: Категория статусы жаңартылды
  */
 router.patch(
-  '/:id/activate',
+  "/:id/activate",
   authenticate,
-  authorize('ADMIN'),
-  [param('id').isInt(), body('isActive').isBoolean()],
+  authorize("ADMIN"),
+  [param("id").isInt(), body("isActive").isBoolean()],
   categoryController.toggleCategoryActive
 );
 

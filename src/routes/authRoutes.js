@@ -9,23 +9,34 @@ const { authenticate } = require("../middlewares/auth");
  * components:
  *   schemas:
  *     User:
- *       type: object
- *       required:
- *         - email
- *         - password
- *         - name
- *       properties:
- *         id:
- *           type: integer
- *           description: Автоматты ID
- *         email:
- *           type: string
- *           format: email
- *         name:
- *           type: string
- *         role:
- *           type: string
- *           enum: [USER, ADMIN]
+ *      type: object
+ *      required:
+ *        - email
+ *        - password
+ *        - name
+ *      properties:
+ *        id:
+ *          type: integer
+ *          description: Автоматты ID
+ *          readOnly: true
+ *        email:
+ *          type: string
+ *          format: email
+ *          example: "user@example.com"
+ *        name:
+ *          type: string
+ *          example: "Алихан"
+ *        password:
+ *          type: string
+ *          format: password
+ *          description: Пайдаланушының құпия сөзі
+ *          writeOnly: true
+ *          example: "12345678"
+ *        role:
+ *          type: string
+ *          enum: [USER, ADMIN]
+ *          default: USER
+ *          readOnly: true
  *     AuthResponse:
  *       type: object
  *       properties:

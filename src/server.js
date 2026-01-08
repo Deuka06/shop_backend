@@ -35,12 +35,7 @@ app.use(compression());
 // CORS - Swagger үшін кеңейтілген баптау
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://194.32.142.105:3000",
-      "https://194.32.142.105",
-      "http://194.32.142.105",
-    ],
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -104,6 +99,7 @@ app.use("/api/v1/auth", require("./routes/authRoutes"));
 app.use("/api/v1/products", require("./routes/productRoutes"));
 app.use("/api/orders", orderHistoryRoutes);
 app.use("/api/v1/courier", require("./routes/courierRoutes"));
+app.use("/api/v1/categories", require("./routes/categoryRoutes"));
 
 // Негізгі маршрут
 app.get("/", (req, res) => {
@@ -203,7 +199,7 @@ app.listen(PORT, HOST, async () => {
   console.log(`🌐 Тікелей қосылу: http://${HOST}:${PORT}`);
   console.log(`🌐 Nginx арқылы: https://194.32.142.105`);
   console.log(`📚 API документация:`);
-  console.log(`   - http://${HOST}:${PORT}/api-docs`);
+  console.log(`   - http://localhost:${PORT}/api-docs`);
   console.log(`   - https://194.32.142.105/api-docs`);
   console.log(`📊 Swagger JSON: http://${HOST}:${PORT}/api-docs/swagger.json`);
 });
