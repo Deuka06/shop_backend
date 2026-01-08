@@ -17,17 +17,17 @@ const app = express();
 // Middleware
 app.use(
   helmet({
-    // Swagger UI үшін кейбір Helmet баптауларын өшіру
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+        // 'self' қосу міндетті, сонда ол өз серверіңізден де файл ала алады
         styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
         scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
         imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", "https:", "http:"], // API сұраныстары үшін
       },
     },
-    crossOriginEmbedderPolicy: false, // Swagger үшін өшіру
-    crossOriginOpenerPolicy: false, // Swagger үшін өшіру
+    crossOriginEmbedderPolicy: false,
   })
 );
 app.use(compression());
@@ -71,10 +71,11 @@ const swaggerOptions = {
   `,
   customSiteTitle: "E-commerce API Documentation",
   // Swagger UI ресурстарын CDN арқылы
-  customCssUrl: "https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui.css",
+  customCssUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css",
   customJs: [
-    "https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-bundle.js",
-    "https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-standalone-preset.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js",
   ],
 };
 
