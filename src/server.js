@@ -17,17 +17,9 @@ const app = express();
 // Middleware
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        // 'self' қосу міндетті, сонда ол өз серверіңізден де файл ала алады
-        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https:", "http:"], // API сұраныстары үшін
-      },
-    },
-    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false,
+    crossOriginOpenerPolicy: false,
+    originAgentCluster: false,
   })
 );
 app.use(compression());
@@ -50,18 +42,14 @@ app.use(cookieParser());
 // Swagger UI - Жетілдірілген баптау
 const swaggerOptions = {
   swaggerOptions: {
-    url: "/api-docs/swagger.json", // Swagger JSON файлының сілтемесі
-    validatorUrl: null, // Валидаторды өшіру (офлайн режим)
+    url: "/api-docs/swagger.json",
+    validatorUrl: null,
     docExpansion: "list",
     defaultModelsExpandDepth: 2,
     displayRequestDuration: true,
     showCommonExtensions: true,
-    // Swagger UI ресурстарын CDN арқылы жүктеу
-    // window.location.origin орнына динамикалық URL қолданамыз
     oauth2RedirectUrl: "/api-docs/oauth2-redirect.html",
-    // Бастапқы таңдалған сервер
     defaultModelRendering: "example",
-    // Authorization token сақтау
     persistAuthorization: true,
   },
   customCss: `
@@ -70,7 +58,6 @@ const swaggerOptions = {
     .swagger-ui .scheme-container { background-color: #fff; padding: 15px; }
   `,
   customSiteTitle: "E-commerce API Documentation",
-  // Swagger UI ресурстарын CDN арқылы
   customCssUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css",
   customJs: [
@@ -83,7 +70,12 @@ const swaggerOptions = {
 app.use(
   "/api-docs",
   swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec, swaggerOptions)
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    customCss: ".swagger-ui .topbar { display: none }", // Мысалы, интерфейсті сәл реттеу
+  })
 );
 
 // Swagger JSON файлын бөлек алу үшін
