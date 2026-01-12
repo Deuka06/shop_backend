@@ -1,5 +1,6 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+require("dotenv").config();
 
 class JWTUtils {
   // JWT токен жасау
@@ -28,17 +29,17 @@ class JWTUtils {
 
   // Cookie орнату
   static setTokenCookie(res, token) {
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 күн
-      sameSite: 'strict',
+      sameSite: "strict",
     });
   }
 
   // Cookie тазалау
   static clearTokenCookie(res) {
-    res.clearCookie('token');
+    res.clearCookie("token");
   }
 }
 
