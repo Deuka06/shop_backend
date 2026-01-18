@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 exports.getAllProducts = async (req, res, next) => {
@@ -8,8 +8,8 @@ exports.getAllProducts = async (req, res, next) => {
       limit = 10,
       categoryId,
       categorySlug,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
+      sortBy = "createdAt",
+      sortOrder = "desc",
       search,
       minPrice,
       maxPrice,
@@ -21,23 +21,6 @@ exports.getAllProducts = async (req, res, next) => {
 
     if (categoryId) {
       where.categoryId = parseInt(categoryId);
-    } else if (categorySlug) {
-      const category = await prisma.category.findFirst({
-        where: { slug: categorySlug, isActive: true },
-      });
-
-      if (category) {
-        where.categoryId = category.id;
-      } else {
-        return res.status(200).json({
-          success: true,
-          count: 0,
-          total: 0,
-          totalPages: 0,
-          currentPage: parseInt(page),
-          data: [],
-        });
-      }
     }
 
     if (minPrice || maxPrice) {
@@ -46,23 +29,23 @@ exports.getAllProducts = async (req, res, next) => {
       if (maxPrice) where.price.lte = parseFloat(maxPrice);
     }
 
-    if (inStock === 'true') {
+    if (inStock === "true") {
       where.stock = { gt: 0 };
-    } else if (inStock === 'false') {
+    } else if (inStock === "false") {
       where.stock = 0;
     }
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
       ];
     }
 
     const orderBy = {};
-    if (sortBy === 'price') {
+    if (sortBy === "price") {
       orderBy.price = sortOrder;
-    } else if (sortBy === 'name') {
+    } else if (sortBy === "name") {
       orderBy.name = sortOrder;
     } else {
       orderBy.createdAt = sortOrder;
@@ -74,17 +57,17 @@ exports.getAllProducts = async (req, res, next) => {
       take: parseInt(limit),
       orderBy,
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        // user: {
+        //   select: {
+        //     id: true,
+        //     name: true,
+        //     email: true,
+        //   },
+        // },
         category: {
           select: {
             id: true,
-            name: true,
+            categoryName: true,
             slug: true,
             imageUrl: true,
           },
@@ -108,7 +91,7 @@ exports.getAllProducts = async (req, res, next) => {
           parent: {
             select: {
               id: true,
-              name: true,
+              categoryName: true,
               slug: true,
             },
           },
@@ -118,7 +101,7 @@ exports.getAllProducts = async (req, res, next) => {
       if (category) {
         categoryInfo = {
           id: category.id,
-          name: category.name,
+          categoryName: category.categoryName,
           slug: category.slug,
           description: category.description,
           parent: category.parent,
@@ -147,17 +130,17 @@ exports.getProductById = async (req, res, next) => {
     const product = await prisma.product.findUnique({
       where: { id: parseInt(id) },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        // user: {
+        //   select: {
+        //     id: true,
+        //     name: true,
+        //     email: true,
+        //   },
+        // },
         category: {
           select: {
             id: true,
-            name: true,
+            categoryName: true,
             slug: true,
             description: true,
             imageUrl: true,
@@ -169,7 +152,7 @@ exports.getProductById = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Өнім табылмады',
+        message: "Өнім табылмады",
       });
     }
 
@@ -189,7 +172,7 @@ exports.createProduct = async (req, res, next) => {
     if (!name || !price) {
       return res.status(400).json({
         success: false,
-        message: 'Өнім атауы мен бағасы міндетті өріс',
+        message: "Өнім атауы мен бағасы міндетті өріс",
       });
     }
 
@@ -201,7 +184,7 @@ exports.createProduct = async (req, res, next) => {
       if (!category) {
         return res.status(400).json({
           success: false,
-          message: 'Категория табылмады',
+          message: "Категория табылмады",
         });
       }
     }
@@ -220,7 +203,7 @@ exports.createProduct = async (req, res, next) => {
         category: {
           select: {
             id: true,
-            name: true,
+            categoryName: true,
             slug: true,
           },
         },
@@ -229,7 +212,7 @@ exports.createProduct = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'Өнім сәтті қосылды',
+      message: "Өнім сәтті қосылды",
       data: product,
     });
   } catch (error) {
@@ -249,14 +232,14 @@ exports.updateProduct = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Өнім табылмады',
+        message: "Өнім табылмады",
       });
     }
 
-    if (product.userId !== req.user.id && req.user.role !== 'ADMIN') {
+    if (product.userId !== req.user.id && req.user.role !== "ADMIN") {
       return res.status(403).json({
         success: false,
-        message: 'Бұл өнімді өңдеуге рұқсатыңыз жоқ',
+        message: "Бұл өнімді өңдеуге рұқсатыңыз жоқ",
       });
     }
 
@@ -273,7 +256,7 @@ exports.updateProduct = async (req, res, next) => {
         if (!category) {
           return res.status(400).json({
             success: false,
-            message: 'Категория табылмады',
+            message: "Категория табылмады",
           });
         }
       }
@@ -304,7 +287,7 @@ exports.updateProduct = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Өнім сәтті жаңартылды',
+      message: "Өнім сәтті жаңартылды",
       data: updatedProduct,
     });
   } catch (error) {
@@ -323,14 +306,14 @@ exports.deleteProduct = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Өнім табылмады',
+        message: "Өнім табылмады",
       });
     }
 
-    if (req.user.role !== 'ADMIN') {
+    if (req.user.role !== "ADMIN") {
       return res.status(403).json({
         success: false,
-        message: 'Өнімді жоюға рұқсатыңыз жоқ',
+        message: "Өнімді жоюға рұқсатыңыз жоқ",
       });
     }
 
@@ -340,7 +323,7 @@ exports.deleteProduct = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Өнім сәтті жойылды',
+      message: "Өнім сәтті жойылды",
     });
   } catch (error) {
     next(error);
@@ -353,8 +336,8 @@ exports.getProductsByCategory = async (req, res, next) => {
     const {
       page = 1,
       limit = 10,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
+      sortBy = "createdAt",
+      sortOrder = "desc",
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -383,7 +366,7 @@ exports.getProductsByCategory = async (req, res, next) => {
     if (!category) {
       return res.status(404).json({
         success: false,
-        message: 'Категория табылмады',
+        message: "Категория табылмады",
       });
     }
 

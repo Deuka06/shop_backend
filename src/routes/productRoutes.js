@@ -1,65 +1,37 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { body, param } = require('express-validator');
-const productController = require('../controllers/productController');
-const { authenticate, authorize } = require('../middlewares/auth');
+const { body, param, query } = require("express-validator");
+const productController = require("../controllers/productController");
+const { authenticate, authorize } = require("../middlewares/auth");
 
 /**
  * @swagger
  * /products:
  *   get:
- *     summary: Барлық өнімдерді алу
+ *     summary: Категория бойынша өнімдерді алу
  *     tags: [Products]
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *       - in: query
  *         name: categoryId
+ *         required: true
  *         schema:
  *           type: integer
- *       - in: query
- *         name: categorySlug
- *         schema:
- *           type: string
- *       - in: query
- *         name: minPrice
- *         schema:
- *           type: number
- *       - in: query
- *         name: maxPrice
- *         schema:
- *           type: number
- *       - in: query
- *         name: inStock
- *         schema:
- *           type: boolean
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [createdAt, price, name]
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [asc, desc]
+ *           description: Тауарларды алу үшін категорияның ID-сін жіберу міндетті
  *     responses:
  *       200:
  *         description: Өнімдер тізімі
  */
-router.get('/', productController.getAllProducts);
+router.get(
+  "/",
+  [
+    query("categoryId")
+      .notEmpty()
+      .withMessage("categoryId жіберілуі тиіс")
+      .isInt()
+      .withMessage("categoryId сан болуы керек"),
+  ],
+  productController.getAllProducts,
+);
 
 /**
  * @swagger
@@ -77,7 +49,7 @@ router.get('/', productController.getAllProducts);
  *       200:
  *         description: Категория өнімдері
  */
-router.get('/category/:slug', productController.getProductsByCategory);
+router.get("/category/:slug", productController.getProductsByCategory);
 
 /**
  * @swagger
@@ -95,7 +67,7 @@ router.get('/category/:slug', productController.getProductsByCategory);
  *       200:
  *         description: Өнім деректері
  */
-router.get('/:id', productController.getProductById);
+router.get("/:id", productController.getProductById);
 
 /**
  * @swagger
@@ -132,18 +104,18 @@ router.get('/:id', productController.getProductById);
  *         description: Өнім сәтті қосылды
  */
 router.post(
-  '/',
+  "/",
   authenticate,
-  authorize(['ADMIN', 'SELLER']),
+  authorize(["ADMIN"]),
   [
-    body('name').notEmpty().withMessage('Өнім атауын енгізіңіз'),
-    body('price')
+    body("name").notEmpty().withMessage("Өнім атауын енгізіңіз"),
+    body("price")
       .isFloat({ gt: 0 })
-      .withMessage('Баға 0-ден үлкен болуы керек'),
-    body('stock').optional().isInt({ min: 0 }),
-    body('categoryId').optional().isInt(),
+      .withMessage("Баға 0-ден үлкен болуы керек"),
+    body("stock").optional().isInt({ min: 0 }),
+    body("categoryId").optional().isInt(),
   ],
-  productController.createProduct
+  productController.createProduct,
 );
 
 /**
@@ -184,17 +156,17 @@ router.post(
  *         description: Өнім сәтті жаңартылды
  */
 router.put(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize(['ADMIN', 'SELLER']),
+  authorize(["ADMIN", "SELLER"]),
   [
-    param('id').isInt(),
-    body('name').optional().notEmpty(),
-    body('price').optional().isFloat({ gt: 0 }),
-    body('stock').optional().isInt({ min: 0 }),
-    body('categoryId').optional().isInt(),
+    param("id").isInt(),
+    body("name").optional().notEmpty(),
+    body("price").optional().isFloat({ gt: 0 }),
+    body("stock").optional().isInt({ min: 0 }),
+    body("categoryId").optional().isInt(),
   ],
-  productController.updateProduct
+  productController.updateProduct,
 );
 
 /**
@@ -216,11 +188,11 @@ router.put(
  *         description: Өнім жойылды
  */
 router.delete(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize('ADMIN'),
-  [param('id').isInt()],
-  productController.deleteProduct
+  authorize("ADMIN"),
+  [param("id").isInt()],
+  productController.deleteProduct,
 );
 
 module.exports = router;

@@ -6,6 +6,9 @@ require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 class JWTUtils {
   // JWT токен жасау
   static generateToken(user) {
+    if (process.env.JWT_SECRET) {
+      console.error("JWT_SECRET табылмады! Контроллерге undefined мәні кетті.");
+    }
     return jwt.sign(
       {
         id: user.id,
