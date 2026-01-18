@@ -8,6 +8,7 @@ exports.getAllCategories = async (req, res, next) => {
       select: {
         id: true,
         categoryName: true,
+        slug: true,
       },
       orderBy: { displayOrder: "asc" },
     });
@@ -15,6 +16,7 @@ exports.getAllCategories = async (req, res, next) => {
     const formattedData = categories.map((cat) => ({
       id: cat.id,
       categoryName: cat.categoryName,
+      slug: cat.slug,
     }));
 
     res.status(200).json(formattedData);
