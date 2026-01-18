@@ -87,9 +87,9 @@ router.get("/tree", categoryController.getCategoryTree);
  *                displayOrder:
  *                  type: integer
  *                  example: 1
- *              responses:
- *                201:
- *                  description: Категория сәтті құрылды
+ *      responses:
+ *        201:
+ *          description: Категория сәтті құрылды
  */
 router.post(
   "/",
