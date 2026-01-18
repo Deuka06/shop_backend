@@ -13,26 +13,29 @@ const { authenticate, authorize } = require("../middlewares/auth");
 
 /**
  * @swagger
- * /categories:
- *   get:
- *     summary: Барлық категорияларды алу
- *     tags: [Categories]
- *     responses:
- *       200:
- *         description: Категориялар тізімі сәтті алынды
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   categoryName:
- *                     type: string
- *                     example: "Электроника"
+ *  /categories:
+ *    get:
+ *      summary: Барлық категорияларды алу
+ *      tags: [Categories]
+ *      responses:
+ *        200:
+ *          description: Категориялар тізімі сәтті алынды
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                    example: 1
+ *                  categoryName:
+ *                    type: string
+ *                    example: "Электроника"
+ *                slug:
+ *                  type: string
+ *                  example: "electronics"
  */
 router.get("/", categoryController.getAllCategories);
 
@@ -50,40 +53,43 @@ router.get("/tree", categoryController.getCategoryTree);
 
 /**
  * @swagger
- * /categories:
- *   post:
- *     summary: Жаңа категория құру
- *     tags: [Categories]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - categoryName
- *             properties:
- *               categoryName:
- *                 type: string
- *                 example: "Электроника"
- *               description:
- *                 type: string
- *                 example: "Тұрмыстық техника және гаджеттер"
- *               parentId:
- *                 type: integer
- *                 nullable: true
- *                 example: null
- *               isActive:
- *                 type: boolean
- *                 example: true
- *               displayOrder:
- *                 type: integer
- *                 example: 1
- *     responses:
- *       201:
- *         description: Категория сәтті құрылды
+ *  /categories:
+ *    post:
+ *      summary: Жаңа категория құру
+ *      tags: [Categories]
+ *      security:
+ *        - bearerAuth: []
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required:
+ *                - categoryName
+ *                - slug
+ *              properties:
+ *                categoryName:
+ *                  type: string
+ *                  example: "Электроника"
+ *                slug:
+ *                  type: string
+ *                  example: "electronics"
+ *                description:
+ *                  type: string
+ *                  example: "Тұрмыстық техника және гаджеттер"
+ *                parentId:
+ *                  type: integer
+ *                  nullable: true
+ *                isActive:
+ *                  type: boolean
+ *                  example: true
+ *                displayOrder:
+ *                  type: integer
+ *                  example: 1
+ *              responses:
+ *                201:
+ *                  description: Категория сәтті құрылды
  */
 router.post(
   "/",
@@ -91,6 +97,11 @@ router.post(
   authorize("ADMIN"),
   [
     body("categoryName").notEmpty().withMessage("Категория атауын енгізіңіз"),
+    body("slug")
+      .notEmpty()
+      .withMessage("Slug енгізіңіз (мысалы: electronics)")
+      .matches(/^[a-z0-9-]+$/)
+      .withMessage("Slug тек кіші әріптер, сандар және сызықшадан тұруы керек"),
     body("description").optional(),
     body("parentId").optional().isInt(),
     body("isActive").optional().isBoolean(),
@@ -99,9 +110,8 @@ router.post(
     body("metaDescription").optional(),
     body("displayOrder").optional().isInt(),
   ],
-  categoryController.createCategory
+  categoryController.createCategory,
 );
-
 /**
  * @swagger
  * /categories/{id}:
@@ -121,49 +131,51 @@ router.post(
 router.get(
   "/:id",
   [param("id").isInt().withMessage("Категория ID бүтін сан болуы керек")],
-  categoryController.getCategoryById
+  categoryController.getCategoryById,
 );
 
 /**
  * @swagger
- * /categories/{id}:
- *   put:
- *     summary: Категорияны жаңарту
- *     tags: [Categories]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               parentId:
- *                 type: integer
- *               isActive:
- *                 type: boolean
- *               imageUrl:
- *                 type: string
- *               metaTitle:
- *                 type: string
- *               metaDescription:
- *                 type: string
- *               displayOrder:
- *                 type: integer
- *     responses:
- *       200:
- *         description: Категория сәтті жаңартылды
+ *  /categories/{id}:
+ *    put:
+ *      summary: Категорияны жаңарту
+ *      tags: [Categories]
+ *      security:
+ *        - bearerAuth: []
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          required: true
+ *          schema:
+ *            type: integer
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                categoryName:
+ *                  type: string
+ *                slug:
+ *                  type: string
+ *                description:
+ *                  type: string
+ *                parentId:
+ *                  type: integer
+ *                isActive:
+ *                  type: boolean
+ *                imageUrl:
+ *                  type: string
+ *                metaTitle:
+ *                  type: string
+ *                metaDescription:
+ *                  type: string
+ *                displayOrder:
+ *                  type: integer
+ *              responses:
+ *                200:
+ *                  description: Категория сәтті жаңартылды
  */
 router.put(
   "/:id",
@@ -171,7 +183,10 @@ router.put(
   authorize("ADMIN"),
   [
     param("id").isInt().withMessage("Категория ID бүтін сан болуы керек"),
-    body("name").optional().notEmpty(),
+    body("categoryName").optional().notEmpty(),
+    body("slug")
+      .optional()
+      .matches(/^[a-z0-9-]+$/),
     body("description").optional(),
     body("parentId").optional().isInt(),
     body("isActive").optional().isBoolean(),
@@ -180,7 +195,7 @@ router.put(
     body("metaDescription").optional(),
     body("displayOrder").optional().isInt(),
   ],
-  categoryController.updateCategory
+  categoryController.updateCategory,
 );
 
 /**
@@ -206,7 +221,7 @@ router.delete(
   authenticate,
   authorize("ADMIN"),
   [param("id").isInt().withMessage("Категория ID бүтін сан болуы керек")],
-  categoryController.deleteCategory
+  categoryController.deleteCategory,
 );
 
 /**
@@ -243,7 +258,7 @@ router.patch(
   authenticate,
   authorize("ADMIN"),
   [param("id").isInt(), body("isActive").isBoolean()],
-  categoryController.toggleCategoryActive
+  categoryController.toggleCategoryActive,
 );
 
 module.exports = router;
