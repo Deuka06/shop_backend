@@ -60,7 +60,8 @@ exports.getCategoryTree = async (req, res, next) => {
 exports.createCategory = async (req, res, next) => {
   try {
     const {
-      categoryName, // name емес
+      categoryName,
+      slug,
       description,
       parentId,
       isActive = true,
@@ -73,13 +74,6 @@ exports.createCategory = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Категория атауын енгізіңіз" });
     }
-
-    // Slug жасау үшін де categoryName қолданамыз
-    const slug = categoryName
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/--+/g, "-");
 
     const category = await prisma.category.create({
       data: {

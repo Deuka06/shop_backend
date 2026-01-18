@@ -33,9 +33,9 @@ const { authenticate, authorize } = require("../middlewares/auth");
  *                  categoryName:
  *                    type: string
  *                    example: "Электроника"
- *                slug:
- *                  type: string
- *                  example: "electronics"
+ *                  slug:
+ *                    type: string
+ *                    example: "electronics"
  */
 router.get("/", categoryController.getAllCategories);
 
