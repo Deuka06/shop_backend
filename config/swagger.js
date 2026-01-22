@@ -15,7 +15,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://194.32.142.105/api/v1",
+        url: "http://46.247.41.196/api/v1",
         description: "Production Server",
       },
       {

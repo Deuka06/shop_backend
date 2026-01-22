@@ -20,7 +20,7 @@ app.use(
     contentSecurityPolicy: false,
     crossOriginOpenerPolicy: false,
     originAgentCluster: false,
-  })
+  }),
 );
 app.use(compression());
 
@@ -31,7 +31,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  })
+  }),
 );
 
 app.use(morgan("dev"));
@@ -75,7 +75,7 @@ app.use(
       persistAuthorization: true,
     },
     customCss: ".swagger-ui .topbar { display: none }", // Мысалы, интерфейсті сәл реттеу
-  })
+  }),
 );
 
 // Swagger JSON файлын бөлек алу үшін
@@ -116,8 +116,8 @@ app.get("/", (req, res) => {
     },
     access: {
       current: `${protocol}://${host}`,
-      direct: `http://194.32.142.105:3000`,
-      nginx: `https://194.32.142.105`,
+      direct: `http://46.247.41.196:3000`,
+      nginx: `https://46.247.41.196`,
       api: `${protocol}://${host.replace(/:3000$/, "")}/api/v1`,
     },
   });
@@ -190,10 +190,10 @@ app.listen(PORT, HOST, async () => {
   await connectDB();
   console.log(`✅ Сервер ${PORT} портында іске қосылды`);
   console.log(`🌐 Тікелей қосылу: http://${HOST}:${PORT}`);
-  console.log(`🌐 Nginx арқылы: https://194.32.142.105`);
+  console.log(`🌐 Nginx арқылы: https://46.247.41.196`);
   console.log(`📚 API документация:`);
   console.log(`   - http://localhost:${PORT}/api-docs`);
-  console.log(`   - https://194.32.142.105/api-docs`);
+  console.log(`   - https://46.247.41.196/api-docs`);
   console.log(`📊 Swagger JSON: http://${HOST}:${PORT}/api-docs/swagger.json`);
 });
 
