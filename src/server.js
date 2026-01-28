@@ -116,7 +116,7 @@ app.get("/", (req, res) => {
     },
     access: {
       current: `${protocol}://${host}`,
-      direct: `http://46.247.41.196:3000`,
+      direct: `http://46.247.41.196`,
       nginx: `https://46.247.41.196`,
       api: `${protocol}://${host.replace(/:3000$/, "")}/api/v1`,
     },
