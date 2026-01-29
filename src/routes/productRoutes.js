@@ -110,7 +110,6 @@ router.post(
     body("price")
       .isFloat({ gt: 0 })
       .withMessage("Баға 0-ден үлкен болуы керек"),
-    body("stock").optional().isInt({ min: 0 }),
     body("categoryId").optional().isInt(),
   ],
   productController.createProduct,
@@ -159,7 +158,6 @@ router.put(
     param("id").isInt(),
     body("name").optional().notEmpty(),
     body("price").optional().isFloat({ gt: 0 }),
-    body("stock").optional().isInt({ min: 0 }),
     body("categoryId").optional().isInt(),
   ],
   productController.updateProduct,
