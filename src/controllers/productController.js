@@ -13,7 +13,6 @@ exports.getAllProducts = async (req, res, next) => {
       search,
       minPrice,
       maxPrice,
-      inStock,
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -27,12 +26,6 @@ exports.getAllProducts = async (req, res, next) => {
       where.price = {};
       if (minPrice) where.price.gte = parseFloat(minPrice);
       if (maxPrice) where.price.lte = parseFloat(maxPrice);
-    }
-
-    if (inStock === "true") {
-      where.stock = { gt: 0 };
-    } else if (inStock === "false") {
-      where.stock = 0;
     }
 
     if (search) {
@@ -167,7 +160,7 @@ exports.getProductById = async (req, res, next) => {
 
 exports.createProduct = async (req, res, next) => {
   try {
-    const { name, description, price, stock, categoryId, image } = req.body;
+    const { name, description, price, categoryId, image } = req.body;
 
     if (!name || !price) {
       return res.status(400).json({
@@ -194,7 +187,6 @@ exports.createProduct = async (req, res, next) => {
         name,
         description,
         price: parseFloat(price),
-        stock: parseInt(stock) || 0,
         image,
         userId: req.user.id,
         categoryId: categoryId ? parseInt(categoryId) : null,
@@ -266,9 +258,6 @@ exports.updateProduct = async (req, res, next) => {
 
     if (updateData.price !== undefined) {
       updateData.price = parseFloat(updateData.price);
-    }
-    if (updateData.stock !== undefined) {
-      updateData.stock = parseInt(updateData.stock);
     }
 
     const updatedProduct = await prisma.product.update({

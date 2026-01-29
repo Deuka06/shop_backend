@@ -93,8 +93,6 @@ router.get("/:id", productController.getProductById);
  *                 type: string
  *               price:
  *                 type: number
- *               stock:
- *                 type: integer
  *               categoryId:
  *                 type: integer
  *               image:
@@ -145,8 +143,6 @@ router.post(
  *                 type: string
  *               price:
  *                 type: number
- *               stock:
- *                 type: integer
  *               categoryId:
  *                 type: integer
  *               image:
