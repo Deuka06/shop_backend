@@ -104,7 +104,7 @@ router.get("/:id", productController.getProductById);
 router.post(
   "/",
   authenticate,
-  authorize("ADMIN"),
+  authorize("USER"),
   [
     body("name").notEmpty().withMessage("Өнім атауын енгізіңіз"),
     body("price")
