@@ -9,6 +9,7 @@ exports.getAllCategories = async (req, res, next) => {
         id: true,
         categoryName: true,
         slug: true,
+        imageUrl: true,
       },
       orderBy: { displayOrder: "asc" },
     });
@@ -17,6 +18,7 @@ exports.getAllCategories = async (req, res, next) => {
       id: cat.id,
       categoryName: cat.categoryName,
       slug: cat.slug,
+      imageUrl: cat.imageUrl,
     }));
 
     res.status(200).json(formattedData);
