@@ -36,6 +36,9 @@ const { authenticate, authorize } = require("../middlewares/auth");
  *                  slug:
  *                    type: string
  *                    example: "electronics"
+ *                  imageUrl:
+ *                    type: string
+ *                    example: "xxx.jpg"
  */
 router.get("/", categoryController.getAllCategories);
 
@@ -75,18 +78,12 @@ router.get("/tree", categoryController.getCategoryTree);
  *                slug:
  *                  type: string
  *                  example: "electronics"
- *                description:
- *                  type: string
- *                  example: "Тұрмыстық техника және гаджеттер"
  *                parentId:
  *                  type: integer
  *                  nullable: true
- *                isActive:
- *                  type: boolean
- *                  example: true
- *                displayOrder:
- *                  type: integer
- *                  example: 1
+ *                imageUrl:
+ *                  type: string
+ *                  example: "xxx.jpg"
  *      responses:
  *        201:
  *          description: Категория сәтті құрылды
