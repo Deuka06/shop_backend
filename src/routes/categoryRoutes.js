@@ -156,20 +156,8 @@ router.get(
  *                  type: string
  *                slug:
  *                  type: string
- *                description:
- *                  type: string
- *                parentId:
- *                  type: integer
- *                isActive:
- *                  type: boolean
  *                imageUrl:
  *                  type: string
- *                metaTitle:
- *                  type: string
- *                metaDescription:
- *                  type: string
- *                displayOrder:
- *                  type: integer
  *              responses:
  *                200:
  *                  description: Категория сәтті жаңартылды

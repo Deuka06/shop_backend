@@ -219,8 +219,9 @@ exports.updateCategory = async (req, res, next) => {
         parent: {
           select: {
             id: true,
-            name: true,
+            categoryName: true,
             slug: true,
+            imageUrl: true,
           },
         },
       },
