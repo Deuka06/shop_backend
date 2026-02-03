@@ -158,9 +158,9 @@ router.get(
  *                  type: string
  *                imageUrl:
  *                  type: string
- *              responses:
- *                200:
- *                  description: Категория сәтті жаңартылды
+ *      responses:
+ *        200:
+ *          description: Категория сәтті жаңартылды
  */
 router.put(
   "/:id",
