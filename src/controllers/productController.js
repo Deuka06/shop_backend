@@ -267,7 +267,7 @@ exports.updateProduct = async (req, res, next) => {
         category: {
           select: {
             id: true,
-            name: true,
+            categoryName: true,
             slug: true,
           },
         },
