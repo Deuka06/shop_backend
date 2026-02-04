@@ -8,6 +8,7 @@ const compression = require("compression");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./../config/swagger");
 const orderHistoryRoutes = require("./routes/orderHistoryRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -90,7 +91,8 @@ app.use("/swagger-ui", express.static("node_modules/swagger-ui-dist"));
 // Маршруттар
 app.use("/api/v1/auth", require("./routes/authRoutes"));
 app.use("/api/v1/products", require("./routes/productRoutes"));
-app.use("/api/orders", orderHistoryRoutes);
+app.use("/api/orders/history", orderHistoryRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/v1/courier", require("./routes/courierRoutes"));
 app.use("/api/v1/categories", require("./routes/categoryRoutes"));
 
