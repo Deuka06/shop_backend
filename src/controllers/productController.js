@@ -215,59 +215,47 @@ exports.createProduct = async (req, res, next) => {
 exports.updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    // req.body-ден тек қажетті өрістерді бөліп аламыз
+    const { name, description, price, categoryId, image, stock } = req.body;
 
     const product = await prisma.product.findUnique({
       where: { id: parseInt(id) },
     });
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Өнім табылмады",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Өнім табылмады" });
     }
 
+    // Рұқсатты тексеру (бұрынғыша)
     if (product.userId !== req.user.id && req.user.role !== "ADMIN") {
-      return res.status(403).json({
-        success: false,
-        message: "Бұл өнімді өңдеуге рұқсатыңыз жоқ",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "Рұқсатыңыз жоқ" });
     }
 
-    if (updateData.categoryId !== undefined) {
-      const categoryId = updateData.categoryId
-        ? parseInt(updateData.categoryId)
-        : null;
+    // Жаңартылатын деректер объектісін жинаймыз
+    const dataToUpdate = {};
+    if (name !== undefined) dataToUpdate.name = name;
+    if (description !== undefined) dataToUpdate.description = description;
+    if (price !== undefined) dataToUpdate.price = parseFloat(price);
+    if (stock !== undefined) dataToUpdate.stock = parseInt(stock);
+    if (image !== undefined) dataToUpdate.image = image;
 
-      if (categoryId) {
-        const category = await prisma.category.findUnique({
-          where: { id: categoryId },
-        });
-
-        if (!category) {
-          return res.status(400).json({
-            success: false,
-            message: "Категория табылмады",
-          });
-        }
-      }
-
-      updateData.categoryId = categoryId;
-    }
-
-    if (updateData.price !== undefined) {
-      updateData.price = parseFloat(updateData.price);
+    if (categoryId !== undefined) {
+      dataToUpdate.categoryId = categoryId ? parseInt(categoryId) : null;
     }
 
     const updatedProduct = await prisma.product.update({
       where: { id: parseInt(id) },
-      data: updateData,
+      data: dataToUpdate,
+      // МЫНА ЖЕРГЕ НАЗАР АУДАР:
       include: {
         category: {
           select: {
             id: true,
-            name: true,
+            categoryName: true, // Prisma моделінде 'name' емес, 'categoryName' болуы мүмкін
             slug: true,
           },
         },
@@ -280,6 +268,7 @@ exports.updateProduct = async (req, res, next) => {
       data: updatedProduct,
     });
   } catch (error) {
+    console.error("Update Error:", error);
     next(error);
   }
 };
