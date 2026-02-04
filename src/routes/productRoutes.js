@@ -151,7 +151,7 @@ router.post(
 router.put(
   "/:id",
   authenticate,
-  authorize(["ADMIN", "SELLER"]),
+  authorize("ADMIN"),
   [
     param("id").isInt(),
     body("name").optional().notEmpty(),
