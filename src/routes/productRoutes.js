@@ -142,8 +142,6 @@ router.post(
  *                 type: string
  *               price:
  *                 type: number
- *               categoryId:
- *                 type: integer
  *               image:
  *                 type: string
  *     responses:
