@@ -38,7 +38,8 @@ exports.createOrder = async (req, res) => {
       data: {
         customerName,
         phoneNumber,
-        address,
+        institutionsId: req.body.institutionsId || null,
+        deliveryTo,
         totalAmount,
         userId: req.user.id, // Auth middleware-ден келеді
         status: "PENDING",
@@ -79,13 +80,11 @@ exports.updateStatus = async (req, res) => {
       data: { status },
     });
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: `Статус ${status} күйіне өзгертілді`,
-        data: updatedOrder,
-      });
+    res.status(200).json({
+      success: true,
+      message: `Статус ${status} күйіне өзгертілді`,
+      data: updatedOrder,
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

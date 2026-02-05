@@ -92,17 +92,17 @@ enum OrderStatus {
 }
 
 model Order {
-  id           Int         @id @default(autoincrement())
-  customerName String
-  phoneNumber  String
-  address      String
-  totalAmount  Float
-  status       OrderStatus @default(PENDING) // Әдепкі бойынша "Тексерілуде"
-  items        OrderItem[]
-  userId       Int // Клиенттің өзіне тиесілі екенін білу үшін
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  User         User        @relation(fields: [userId], references: [id])
+  id            Int         @id @default(autoincrement())
+  customerName  String
+  phoneNumber   String
+  institutionId Int
+  totalAmount   Float
+  status        OrderStatus @default(PENDING) // Әдепкі бойынша "Тексерілуде"
+  items         OrderItem[]
+  userId        Int // Клиенттің өзіне тиесілі екенін білу үшін
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  User          User        @relation(fields: [userId], references: [id])
 }
 
 model OrderItem {

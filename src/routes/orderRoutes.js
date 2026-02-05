@@ -35,7 +35,9 @@ const { authenticate, authorize } = require("../middlewares/auth");
  *                 type: string
  *               phoneNumber:
  *                 type: string
- *               address:
+ *               institutionsId:
+ *                 type: number
+ *               deliveryTo:
  *                 type: string
  *               totalAmount:
  *                 type: number
