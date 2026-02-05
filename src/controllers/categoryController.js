@@ -27,11 +27,6 @@ exports.getAllCategories = async (req, res, next) => {
 
 exports.getCategoryTree = async (req, res, next) => {
   try {
-    const categories = await prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: [{ displayOrder: "asc" }, { categoryName: "asc" }],
-    });
-
     const buildTree = (parentId = null) => {
       return categories
         .filter((category) => category.parentId === parentId)
@@ -39,12 +34,9 @@ exports.getCategoryTree = async (req, res, next) => {
           id: category.id,
           categoryName: category.categoryName,
           slug: category.slug,
-          description: category.description,
           imageUrl: category.imageUrl,
-          displayOrder: category.displayOrder,
           children: buildTree(category.id),
-        }))
-        .sort((a, b) => a.displayOrder - b.displayOrder);
+        }));
     };
 
     const categoryTree = buildTree();
@@ -61,15 +53,7 @@ exports.getCategoryTree = async (req, res, next) => {
 
 exports.createCategory = async (req, res, next) => {
   try {
-    const {
-      categoryName,
-      slug,
-      description,
-      parentId,
-      isActive = true,
-      imageUrl,
-      displayOrder = 0,
-    } = req.body;
+    const { categoryName, slug, parentId, imageUrl } = req.body;
 
     if (!categoryName) {
       return res
@@ -79,13 +63,10 @@ exports.createCategory = async (req, res, next) => {
 
     const category = await prisma.category.create({
       data: {
-        categoryName, // Базадағы жаңа өріс атауы
-        description,
+        categoryName,
         slug,
         parentId: parentId ? parseInt(parentId) : null,
-        isActive,
         imageUrl,
-        displayOrder: parseInt(displayOrder),
       },
     });
 
@@ -110,16 +91,12 @@ exports.getCategoryById = async (req, res, next) => {
           },
         },
         children: {
-          where: { isActive: true },
           select: {
             id: true,
             categoryName: true,
             slug: true,
-            description: true,
             imageUrl: true,
-            displayOrder: true,
           },
-          orderBy: [{ displayOrder: "asc" }, { categoryName: "asc" }],
         },
       },
     });
@@ -242,9 +219,7 @@ exports.deleteCategory = async (req, res, next) => {
     const category = await prisma.category.findUnique({
       where: { id: parseInt(id) },
       include: {
-        children: {
-          where: { isActive: true },
-        },
+        children: {},
       },
     });
 
