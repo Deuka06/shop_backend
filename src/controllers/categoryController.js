@@ -218,9 +218,6 @@ exports.deleteCategory = async (req, res, next) => {
 
     const category = await prisma.category.findUnique({
       where: { id: parseInt(id) },
-      include: {
-        children: {},
-      },
     });
 
     if (!category) {
