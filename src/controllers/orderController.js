@@ -14,7 +14,9 @@ ${title}
 👤 Клиент: ${order.customerName}
 📞 Телефон: ${order.phoneNumber}
 💰 Сомасы: ${order.totalAmount} ₸
-📍 Мекенжай: ${order.address}
+📍 Мекеме: ${order.institutionsId}
+👤 Жеткізу: ${order.deliveryTo}
+
 ----------------------------
 ⚠️ Өтініш, төлемді тексеріп, сайттан статусты жаңартыңыз!
   `;
