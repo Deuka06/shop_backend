@@ -1,0 +1,92 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+const axios = require("axios");
+
+// Админге хабарлама жіберу функциясы
+const sendAdminNotification = async (order, title) => {
+  const BOT_TOKEN = "8562842923:AAH29_MTZxLh0Pl9M9QX3__PriCBYppdMtQ";
+  const CHAT_ID = "5084198148";
+
+  const message = `
+${title}
+----------------------------
+🆔 Тапсырыс ID: #${order.id}
+👤 Клиент: ${order.customerName}
+📞 Телефон: ${order.phoneNumber}
+💰 Сомасы: ${order.totalAmount} ₸
+📍 Мекенжай: ${order.address}
+----------------------------
+⚠️ Өтініш, төлемді тексеріп, сайттан статусты жаңартыңыз!
+  `;
+
+  try {
+    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      chat_id: CHAT_ID,
+      text: message,
+      parse_mode: "Markdown",
+    });
+  } catch (err) {
+    console.error("Telegram Error:", err.message);
+  }
+};
+
+// 1. Клиент тапсырыс жасайды
+exports.createOrder = async (req, res) => {
+  try {
+    const { customerName, phoneNumber, address, totalAmount, items } = req.body;
+    const order = await prisma.order.create({
+      data: {
+        customerName,
+        phoneNumber,
+        address,
+        totalAmount,
+        userId: req.user.id, // Auth middleware-ден келеді
+        status: "PENDING",
+        items: { create: items },
+      },
+      include: { items: true },
+    });
+
+    await sendAdminNotification(order, "🔔 ЖАҢА ТАПСЫРЫС ТҮСТІ");
+    res.status(201).json({ success: true, data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// 2. Клиент өз тапсырыстарын көреді (Тарих)
+exports.getMyOrders = async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: { userId: req.user.id },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+    });
+    res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// 3. Админ статусты өзгертеді (Тексерілді -> Қабылданды)
+exports.updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // Мысалы: "ACCEPTED"
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: Number(id) },
+      data: { status },
+    });
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: `Статус ${status} күйіне өзгертілді`,
+        data: updatedOrder,
+      });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
