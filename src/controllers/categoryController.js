@@ -10,7 +10,6 @@ exports.getAllCategories = async (req, res, next) => {
         slug: true,
         imageUrl: true,
       },
-      orderBy: { displayOrder: "asc" },
     });
 
     const formattedData = categories.map((cat) => ({
