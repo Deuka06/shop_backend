@@ -35,7 +35,8 @@ ${title}
 // 1. Клиент тапсырыс жасайды
 exports.createOrder = async (req, res) => {
   try {
-    const { customerName, phoneNumber, address, totalAmount, items } = req.body;
+    const { customerName, phoneNumber, deliveryTo, totalAmount, items } =
+      req.body;
     const order = await prisma.order.create({
       data: {
         customerName,
