@@ -6,8 +6,8 @@ const { authenticate, authorize } = require("../middlewares/auth");
 /**
  * @swagger
  * tags:
- * name: Orders
- * description: Тапсырыстарды басқару (Төлем және Статус)
+ *   name: Orders
+ *   description: Тапсырыстарды басқару (Төлем және Статус)
  */
 
 // Клиент үшін: Тапсырыс беру
@@ -26,11 +26,11 @@ router.get("/all", authenticate, authorize("ADMIN"), async (req, res) => {
 /**
  * @swagger
  * /orders/{id}/status:
- * patch:
- * summary: Тапсырыс статусын өзгерту (Тексеруден өткізу)
- * tags: [Orders]
- * security:
- * - bearerAuth: []
+ *   patch:
+ *     summary: Тапсырыс статусын өзгерту (Тексеруден өткізу)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  */
 router.patch(
   "/:id/status",
