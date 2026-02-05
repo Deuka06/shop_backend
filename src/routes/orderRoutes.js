@@ -10,27 +10,96 @@ const { authenticate, authorize } = require("../middlewares/auth");
  *   description: Тапсырыстарды басқару (Төлем және Статус)
  */
 
-// Клиент үшін: Тапсырыс беру
+/**
+ * @swagger
+ * /orders/create:
+ *   post:
+ *     summary: Жаңа тапсырыс жасау (Клиент үшін)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - customerName
+ *               - phoneNumber
+ *               - address
+ *               - totalAmount
+ *               - items
+ *             properties:
+ *               customerName:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               totalAmount:
+ *                 type: number
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     quantity:
+ *                       type: integer
+ *                     price:
+ *                       type: number
+ *     responses:
+ *       201:
+ *         description: Тапсырыс жасалды
+ */
 router.post("/create", authenticate, orderController.createOrder);
 
-// Клиент үшін: Өз тапсырыстарын көру (Тарих)
+/**
+ * @swagger
+ * /orders/my:
+ *   get:
+ *     summary: Менің тапсырыстар тарихым
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Тапсырыстар тізімі
+ */
 router.get("/my", authenticate, orderController.getMyOrders);
 
-// Админ үшін: Барлық тапсырыстарды көру
-router.get("/all", authenticate, authorize("ADMIN"), async (req, res) => {
-  const orders = await prisma.order.findMany({ include: { items: true } });
-  res.json({ success: true, data: orders });
-});
-
-// Админ үшін: Статусты өзгерту (Мысалы: Тексерілді -> Қабылданды)
 /**
  * @swagger
  * /orders/{id}/status:
  *   patch:
- *     summary: Тапсырыс статусын өзгерту (Тексеруден өткізу)
+ *     summary: Тапсырыс статусын өзгерту (Админ үшін)
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: Тапсырыстың ID нөмірі
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, ACCEPTED, DELIVERED, CANCELLED]
+ *     responses:
+ *       200:
+ *         description: Статус сәтті жаңартылды
  */
 router.patch(
   "/:id/status",
