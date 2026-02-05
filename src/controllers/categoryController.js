@@ -10,16 +10,10 @@ exports.getAllCategories = async (req, res, next) => {
         slug: true,
         imageUrl: true,
       },
+      orderBy: { createdAt: "desc" }, // displayOrder орнына датамен реттеу
     });
 
-    const formattedData = categories.map((cat) => ({
-      id: cat.id,
-      categoryName: cat.categoryName,
-      slug: cat.slug,
-      imageUrl: cat.imageUrl,
-    }));
-
-    res.status(200).json(formattedData);
+    res.status(200).json(categories);
   } catch (error) {
     next(error);
   }
@@ -27,6 +21,10 @@ exports.getAllCategories = async (req, res, next) => {
 
 exports.getCategoryTree = async (req, res, next) => {
   try {
+    const categories = await prisma.category.findMany({
+      orderBy: { categoryName: "asc" },
+    });
+
     const buildTree = (parentId = null) => {
       return categories
         .filter((category) => category.parentId === parentId)
@@ -97,21 +95,18 @@ exports.getCategoryById = async (req, res, next) => {
             slug: true,
             imageUrl: true,
           },
+          orderBy: { categoryName: "asc" },
         },
       },
     });
 
     if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Категория табылмады",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Категория табылмады" });
     }
 
-    res.status(200).json({
-      success: true,
-      data: category,
-    });
+    res.status(200).json({ success: true, data: category });
   } catch (error) {
     next(error);
   }
@@ -120,93 +115,45 @@ exports.getCategoryById = async (req, res, next) => {
 exports.updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const { categoryName, slug, parentId, imageUrl } = req.body;
 
-    const category = await prisma.category.findUnique({
+    const existingCategory = await prisma.category.findUnique({
       where: { id: parseInt(id) },
     });
 
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Категория табылмады",
-      });
+    if (!existingCategory) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Категория табылмады" });
     }
 
-    if (updateData.name && updateData.name !== category.name) {
-      updateData.slug = updateData.name
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/--+/g, "-");
+    const updateData = { categoryName, slug, imageUrl };
 
-      const existingSlug = await prisma.category.findFirst({
-        where: {
-          slug: updateData.slug,
-          id: { not: parseInt(id) },
-        },
-      });
-
-      if (existingSlug) {
-        return res.status(400).json({
-          success: false,
-          message: "Бұл slug қолданыста",
-        });
-      }
-    }
-
-    if (updateData.parentId !== undefined) {
-      const parentId = updateData.parentId
-        ? parseInt(updateData.parentId)
-        : null;
-
-      if (parentId === parseInt(id)) {
-        return res.status(400).json({
-          success: false,
-          message: "Категория өз-өзіне ана болуы мүмкін емес",
-        });
-      }
-
-      if (parentId) {
-        const parentCategory = await prisma.category.findUnique({
-          where: { id: parentId },
-        });
-
-        if (!parentCategory) {
-          return res.status(400).json({
+    if (parentId !== undefined) {
+      const pId = parentId ? parseInt(parentId) : null;
+      if (pId === parseInt(id)) {
+        return res
+          .status(400)
+          .json({
             success: false,
-            message: "Ана категория табылмады",
+            message: "Категория өз-өзіне ана болуы мүмкін емес",
           });
-        }
       }
-
-      updateData.parentId = parentId;
-    }
-
-    if (updateData.displayOrder !== undefined) {
-      updateData.displayOrder = parseInt(updateData.displayOrder);
+      updateData.parentId = pId;
     }
 
     const updatedCategory = await prisma.category.update({
       where: { id: parseInt(id) },
       data: updateData,
-      include: {
-        parent: {
-          select: {
-            id: true,
-            categoryName: true,
-            slug: true,
-            imageUrl: true,
-          },
-        },
-      },
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Категория сәтті жаңартылды",
-      data: updatedCategory,
-    });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Категория жаңартылды",
+        data: updatedCategory,
+      });
   } catch (error) {
     next(error);
   }
@@ -218,64 +165,28 @@ exports.deleteCategory = async (req, res, next) => {
 
     const category = await prisma.category.findUnique({
       where: { id: parseInt(id) },
+      include: { children: true },
     });
 
     if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Категория табылмады",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Категория табылмады" });
     }
 
     if (category.children.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Бұл категорияның белсенді бала категориялары бар. Алдымен оларды өшіріңіз.",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            "Бұл категорияның ішкі тармақтары бар. Алдымен оларды өшіріңіз.",
+        });
     }
 
-    await prisma.category.delete({
-      where: { id: parseInt(id) },
-    });
+    await prisma.category.delete({ where: { id: parseInt(id) } });
 
-    res.status(200).json({
-      success: true,
-      message: "Категория сәтті жойылды",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.toggleCategoryActive = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { isActive } = req.body;
-
-    const category = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
-    });
-
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Категория табылмады",
-      });
-    }
-
-    const updatedCategory = await prisma.category.update({
-      where: { id: parseInt(id) },
-      data: { isActive },
-    });
-
-    res.status(200).json({
-      success: true,
-      message: isActive
-        ? "Категория белсендірілді"
-        : "Категория белсендірілмеді",
-      data: updatedCategory,
-    });
+    res.status(200).json({ success: true, message: "Категория жойылды" });
   } catch (error) {
     next(error);
   }
