@@ -78,7 +78,6 @@ exports.getAllProducts = async (req, res, next) => {
             { id: categoryId ? parseInt(categoryId) : undefined },
             { slug: categorySlug },
           ],
-          isActive: true,
         },
         include: {
           parent: {
@@ -332,7 +331,6 @@ exports.getProductsByCategory = async (req, res, next) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const category = await prisma.category.findFirst({
-      where: { slug, isActive: true },
       include: {
         parent: {
           select: {
@@ -342,7 +340,6 @@ exports.getProductsByCategory = async (req, res, next) => {
           },
         },
         children: {
-          where: { isActive: true },
           select: {
             id: true,
             name: true,
