@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 exports.getAllCategories = async (req, res, next) => {
   try {
     const categories = await prisma.category.findMany({
-      where: { isActive: true },
       select: {
         id: true,
         categoryName: true,
