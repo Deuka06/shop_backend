@@ -35,13 +35,19 @@ ${title}
 // 1. Клиент тапсырыс жасайды
 exports.createOrder = async (req, res) => {
   try {
-    const { customerName, phoneNumber, deliveryTo, totalAmount, items } =
-      req.body;
+    const {
+      customerName,
+      phoneNumber,
+      institutionsId,
+      deliveryTo,
+      totalAmount,
+      items,
+    } = req.body;
     const order = await prisma.order.create({
       data: {
         customerName,
         phoneNumber,
-        institutionsId: req.body.institutionsId || null,
+        institutionsId,
         deliveryTo,
         totalAmount,
         userId: req.user.id, // Auth middleware-ден келеді
