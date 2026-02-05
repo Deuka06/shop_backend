@@ -97,6 +97,7 @@ model Order {
   phoneNumber   String
   institutionId Int
   totalAmount   Float
+  deliveryTo    String
   status        OrderStatus @default(PENDING) // Әдепкі бойынша "Тексерілуде"
   items         OrderItem[]
   userId        Int // Клиенттің өзіне тиесілі екенін білу үшін
