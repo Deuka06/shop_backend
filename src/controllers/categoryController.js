@@ -51,7 +51,7 @@ exports.getCategoryTree = async (req, res, next) => {
 
 exports.createCategory = async (req, res, next) => {
   try {
-    const { categoryName, slug, parentId, imageUrl } = req.body;
+    const { categoryName, slug, parentId } = req.body;
 
     if (!categoryName) {
       return res
@@ -59,12 +59,15 @@ exports.createCategory = async (req, res, next) => {
         .json({ success: false, message: "Категория атауын енгізіңіз" });
     }
 
+    // ЖАҢА: Егер файл жүктелсе, S3 сілтемесін аламыз, әйтпесе body-ден келгенді қолданамыз
+    const finalImageUrl = req.file ? req.file.location : req.body.imageUrl;
+
     const category = await prisma.category.create({
       data: {
         categoryName,
         slug,
         parentId: parentId ? parseInt(parentId) : null,
-        imageUrl,
+        imageUrl: finalImageUrl, // Осы жерге PS.kz сілтемесі түседі
       },
     });
 
@@ -115,7 +118,7 @@ exports.getCategoryById = async (req, res, next) => {
 exports.updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { categoryName, slug, parentId, imageUrl } = req.body;
+    const { categoryName, slug, parentId } = req.body;
 
     const existingCategory = await prisma.category.findUnique({
       where: { id: parseInt(id) },
@@ -127,17 +130,22 @@ exports.updateCategory = async (req, res, next) => {
         .json({ success: false, message: "Категория табылмады" });
     }
 
-    const updateData = { categoryName, slug, imageUrl };
+    // ЖАҢА: Егер жаңа файл келсе, соны аламыз. Келмесе, бұрынғы imageUrl қала береді.
+    const finalImageUrl = req.file ? req.file.location : req.body.imageUrl;
+
+    const updateData = {
+      categoryName,
+      slug,
+      imageUrl: finalImageUrl,
+    };
 
     if (parentId !== undefined) {
       const pId = parentId ? parseInt(parentId) : null;
       if (pId === parseInt(id)) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Категория өз-өзіне ана болуы мүмкін емес",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Категория өз-өзіне ана болуы мүмкін емес",
+        });
       }
       updateData.parentId = pId;
     }
@@ -147,13 +155,11 @@ exports.updateCategory = async (req, res, next) => {
       data: updateData,
     });
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Категория жаңартылды",
-        data: updatedCategory,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Категория жаңартылды",
+      data: updatedCategory,
+    });
   } catch (error) {
     next(error);
   }
@@ -175,13 +181,11 @@ exports.deleteCategory = async (req, res, next) => {
     }
 
     if (category.children.length > 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "Бұл категорияның ішкі тармақтары бар. Алдымен оларды өшіріңіз.",
-        });
+      return res.status(400).json({
+        success: false,
+        message:
+          "Бұл категорияның ішкі тармақтары бар. Алдымен оларды өшіріңіз.",
+      });
     }
 
     await prisma.category.delete({ where: { id: parseInt(id) } });

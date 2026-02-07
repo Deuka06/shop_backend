@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, param } = require("express-validator");
 const categoryController = require("../controllers/categoryController");
 const { authenticate, authorize } = require("../middlewares/auth");
+const upload = require("../services/s3Service");
 
 /**
  * @swagger
@@ -39,19 +40,15 @@ router.get("/tree", categoryController.getCategoryTree);
  * @swagger
  * /categories:
  *   post:
- *     summary: Жаңа категория құру
+ *     summary: Жаңа категория құру (Суретпен бірге)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:  # МАҢЫЗДЫ: Сурет жіберу үшін түрін өзгерту керек
  *           schema:
  *             type: object
- *             required:
- *               - categoryName
- *               - slug
  *             properties:
  *               categoryName:
  *                 type: string
@@ -59,9 +56,9 @@ router.get("/tree", categoryController.getCategoryTree);
  *                 type: string
  *               parentId:
  *                 type: integer
- *                 nullable: true
- *               imageUrl:
+ *               image:
  *                 type: string
+ *                 format: binary # Сурет файлы
  *     responses:
  *       201:
  *         description: Категория сәтті құрылды
@@ -70,6 +67,7 @@ router.post(
   "/",
   authenticate,
   authorize("ADMIN"),
+  upload.single("image"), // ЖАҢА: Суретті PS.kz-ке жүктеу
   [
     body("categoryName").notEmpty().withMessage("Категория атауын енгізіңіз"),
     body("slug")
@@ -78,7 +76,6 @@ router.post(
       .matches(/^[a-z0-9-]+$/)
       .withMessage("Slug тек кіші әріптер мен сызықшадан тұруы керек"),
     body("parentId").optional().isInt(),
-    body("imageUrl").optional().isString(),
   ],
   categoryController.createCategory,
 );
@@ -109,19 +106,11 @@ router.get(
  * @swagger
  * /categories/{id}:
  *   put:
- *     summary: Категорияны жаңарту
+ *     summary: Категорияны жаңарту (Суретті қоса)
  *     tags: [Categories]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
  *     requestBody:
  *       content:
- *         application/json:
+ *         multipart/form-data:  # МАҢЫЗДЫ: JSON-нан multipart-қа ауыстырамыз
  *           schema:
  *             type: object
  *             properties:
@@ -129,8 +118,11 @@ router.get(
  *                 type: string
  *               slug:
  *                 type: string
- *               imageUrl:
+ *               parentId:
+ *                 type: integer
+ *               image:
  *                 type: string
+ *                 format: binary # imageUrl емес, image (файл)
  *     responses:
  *       200:
  *         description: Категория жаңартылды
@@ -139,6 +131,7 @@ router.put(
   "/:id",
   authenticate,
   authorize("ADMIN"),
+  upload.single("image"),
   [
     param("id").isInt().withMessage("ID бүтін сан болуы керек"),
     body("categoryName").optional().notEmpty(),
