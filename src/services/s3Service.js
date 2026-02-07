@@ -4,12 +4,12 @@ const multerS3 = require("multer-s3");
 
 // PS.kz S3 баптаулары (v2 форматы)
 const s3 = new AWS.S3({
-  endpoint: "https://s3.ps.kz",
+  endpoint: new AWS.Endpoint("https://s3.ps.kz"), // Endpoint-ты объект ретінде береміз
   accessKeyId: process.env.S3_ACCESS_KEY,
   secretAccessKey: process.env.S3_SECRET_KEY,
   s3ForcePathStyle: true,
-  signatureVersion: "v4", // Қауіпсіздік үшін қосылды
-  //   region: "kz",
+  signatureVersion: "v4",
+  region: "kz", // PS.kz үшін 'kz' немесе бос мән
 });
 
 const upload = multer({
