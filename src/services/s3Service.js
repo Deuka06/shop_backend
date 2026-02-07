@@ -9,7 +9,7 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.S3_SECRET_KEY,
   s3ForcePathStyle: true,
   signatureVersion: "v4", // Қауіпсіздік үшін қосылды
-  region: "kz",
+  //   region: "kz",
 });
 
 const upload = multer({
