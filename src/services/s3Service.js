@@ -2,14 +2,14 @@ const AWS = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 
-// PS.kz S3 баптаулары (v2 форматы)
+// Баптауларды қатаң түрде тікелей объект арқылы береміз
 const s3 = new AWS.S3({
-  endpoint: new AWS.Endpoint("https://s3.ps.kz"), // Endpoint-ты объект ретінде береміз
   accessKeyId: process.env.S3_ACCESS_KEY,
   secretAccessKey: process.env.S3_SECRET_KEY,
-  s3ForcePathStyle: true,
+  endpoint: "https://s3.ps.kz", // Endpoint-ты қарапайым жол ретінде беріп көрейік
+  s3ForcePathStyle: true, // PS.kz үшін бұл міндетті
   signatureVersion: "v4",
-  region: "kz", // PS.kz үшін 'kz' немесе бос мән
+  region: "kz", // Кейбір SDK нұсқалары үшін 'us-east-1' деп жазу көмектесуі мүмкін, бірақ 'kz' дұрысырақ
 });
 
 const upload = multer({
@@ -17,9 +17,8 @@ const upload = multer({
     s3: s3,
     bucket: process.env.S3_BUCKET,
     acl: "public-read",
-    contentType: multerS3.AUTO_CONTENT_TYPE, // Файл түрін автоматты анықтау
+    contentType: multerS3.AUTO_CONTENT_TYPE,
     key: function (req, file, cb) {
-      // Файлды products папкасына сақтау
       const fileName = `products/${Date.now()}-${file.originalname}`;
       cb(null, fileName);
     },
