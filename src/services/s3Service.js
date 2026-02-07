@@ -2,25 +2,26 @@ const AWS = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 
-// PS.kz S3 баптаулары
+// PS.kz S3 баптаулары (v2 форматы)
 const s3 = new AWS.S3({
-  endpoint: "https://s3.ps.kz", // PS.kz стандарты
+  endpoint: "https://s3.ps.kz",
   accessKeyId: process.env.S3_ACCESS_KEY,
   secretAccessKey: process.env.S3_SECRET_KEY,
-  s3ForcePathStyle: true, // PS.kz үшін міндетті параметр
-  region: "kz", // Кез келген мән, бірақ бос болмауы керек
+  s3ForcePathStyle: true,
+  signatureVersion: "v4", // Қауіпсіздік үшін қосылды
+  region: "kz",
 });
 
 const upload = multer({
   storage: multerS3({
     s3: s3,
-    bucket: "qamqor-images", // Сен құрған контейнер аты
-    acl: "public-read", // Суреттер бәріне көрінуі үшін
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
+    bucket: process.env.S3_BUCKET,
+    acl: "public-read",
+    contentType: multerS3.AUTO_CONTENT_TYPE, // Файл түрін автоматты анықтау
     key: function (req, file, cb) {
-      cb(null, `products/${Date.now().toString()}-${file.originalname}`);
+      // Файлды products папкасына сақтау
+      const fileName = `products/${Date.now()}-${file.originalname}`;
+      cb(null, fileName);
     },
   }),
 });
