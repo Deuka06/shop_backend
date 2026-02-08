@@ -159,14 +159,18 @@ exports.getProductById = async (req, res, next) => {
 
 exports.createProduct = async (req, res, next) => {
   try {
-    const { name, description, price, categoryId, image } = req.body;
+    const { name, description, price, categoryId } = req.body;
 
+    // 1. Міндетті өрістерді тексеру
     if (!name || !price) {
       return res.status(400).json({
         success: false,
         message: "Өнім атауы мен бағасы міндетті өріс",
       });
     }
+
+    // 2. Суреттің бар-жоғын тексеру (upload middleware-ден келеді)
+    const imageUrl = req.file ? req.file.location : null;
 
     if (categoryId) {
       const category = await prisma.category.findUnique({
@@ -181,12 +185,13 @@ exports.createProduct = async (req, res, next) => {
       }
     }
 
+    // 3. Өнімді деректер қорына сақтау
     const product = await prisma.product.create({
       data: {
         name,
         description,
         price: parseFloat(price),
-        image,
+        image: imageUrl, // S3-тен келген сілтемені сақтаймыз
         userId: req.user.id,
         categoryId: categoryId ? parseInt(categoryId) : null,
       },
@@ -214,8 +219,9 @@ exports.createProduct = async (req, res, next) => {
 exports.updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const { name, description, price, categoryId } = req.body;
 
+    // Өнімді іздеу
     const product = await prisma.product.findUnique({
       where: { id: parseInt(id) },
     });
@@ -227,6 +233,7 @@ exports.updateProduct = async (req, res, next) => {
       });
     }
 
+    // Рұқсатты тексеру
     if (product.userId !== req.user.id && req.user.role !== "ADMIN") {
       return res.status(403).json({
         success: false,
@@ -234,29 +241,35 @@ exports.updateProduct = async (req, res, next) => {
       });
     }
 
-    if (updateData.categoryId !== undefined) {
-      const categoryId = updateData.categoryId
-        ? parseInt(updateData.categoryId)
-        : null;
+    // Жаңартылатын деректерді жинау
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (description) updateData.description = description;
+    if (price) updateData.price = parseFloat(price);
 
-      if (categoryId) {
-        const category = await prisma.category.findUnique({
-          where: { id: categoryId },
-        });
-
-        if (!category) {
-          return res.status(400).json({
-            success: false,
-            message: "Категория табылмады",
-          });
-        }
-      }
-
-      updateData.categoryId = categoryId;
+    // Егер жаңа сурет келсе, соны қосамыз
+    if (req.file) {
+      updateData.image = req.file.location;
     }
 
-    if (updateData.price !== undefined) {
-      updateData.price = parseFloat(updateData.price);
+    // Категорияны тексеру
+    if (categoryId !== undefined) {
+      const parsedCategoryId =
+        categoryId === "null" || categoryId === ""
+          ? null
+          : parseInt(categoryId);
+
+      if (parsedCategoryId) {
+        const category = await prisma.category.findUnique({
+          where: { id: parsedCategoryId },
+        });
+        if (!category) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Категория табылмады" });
+        }
+      }
+      updateData.categoryId = parsedCategoryId;
     }
 
     const updatedProduct = await prisma.product.update({

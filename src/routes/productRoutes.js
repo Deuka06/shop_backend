@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, param, query } = require("express-validator");
 const productController = require("../controllers/productController");
 const { authenticate, authorize } = require("../middlewares/auth");
+const upload = require("../services/s3Service");
 
 /**
  * @swagger
@@ -73,38 +74,42 @@ router.get("/:id", productController.getProductById);
  * @swagger
  * /products:
  *   post:
- *     summary: Жаңа өнім қосу
+ *     summary: Жаңа өнім қосу (Суретпен бірге)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - price
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               price:
- *                 type: number
- *               categoryId:
- *                 type: integer
- *               image:
- *                 type: string
+ *         content:
+ *           multipart/form-data:  # JSON-нан multipart-қа өзгерттік
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - name
+ *                 - price
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   description: Өнім атауы
+ *                 price:
+ *                   type: number
+ *                   description: Өнім бағасы
+ *                 categoryId:
+ *                   type: integer
+ *                   description: Өнім категориясының ID-сі
+ *                 image:
+ *                   type: string
+ *                   format: binary
+ *                   description: Өнім суреті (файл)
  *     responses:
  *       201:
- *         description: Өнім сәтті қосылды
+ *         description: Өнім сәтті құрылды
  */
 router.post(
   "/",
   authenticate,
-  authorize("USER"),
+  authorize("ADMIN"), // "USER"-ден "ADMIN"-ге өзгерткен дұрыс шығар?
+  upload.single("image"), // 'image' деген атпен келетін файлды қабылдау
   [
     body("name").notEmpty().withMessage("Өнім атауын енгізіңіз"),
     body("price")
@@ -119,7 +124,7 @@ router.post(
  * @swagger
  * /products/{id}:
  *   put:
- *     summary: Өнімді жаңарту
+ *     summary: Өнімді жаңарту (Мәтін немесе Сурет)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -132,7 +137,7 @@ router.post(
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -140,8 +145,13 @@ router.post(
  *                 type: string
  *               price:
  *                 type: number
+ *               categoryId:
+ *                 type: integer
+ *               description:
+ *                 type: string
  *               image:
  *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Өнім сәтті жаңартылды
@@ -150,10 +160,14 @@ router.put(
   "/:id",
   authenticate,
   authorize("ADMIN"),
+  upload.single("image"), // 'image' кілтімен келетін файлды ұстайды
   [
-    param("id").isInt(),
-    body("name").optional().notEmpty(),
-    body("price").optional().isFloat({ gt: 0 }),
+    param("id").isInt().withMessage("ID сан болуы керек"),
+    body("name").optional().notEmpty().withMessage("Атауы бос болмауы керек"),
+    body("price")
+      .optional()
+      .isFloat({ gt: 0 })
+      .withMessage("Баға 0-ден үлкен болуы керек"),
     body("categoryId").optional().isInt(),
   ],
   productController.updateProduct,
