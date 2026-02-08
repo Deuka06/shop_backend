@@ -42,8 +42,6 @@ const { authenticate, authorize } = require("../middlewares/auth");
  *              totalAmount:
  *                type: number
  *              items:
- *                type: array
- *              items:
  *                type: object
  *                  properties:
  *                    name:
