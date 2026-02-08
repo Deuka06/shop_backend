@@ -105,7 +105,7 @@ exports.getAllOrders = async (req, res) => {
     const orders = await prisma.order.findMany({
       include: {
         items: true,
-        user: { select: { email: true, name: true } }, // Тапсырыс берген қолданушы туралы ақпарат (міндетті емес)
+        User: { select: { email: true, name: true } }, // Тапсырыс берген қолданушы туралы ақпарат (міндетті емес)
       },
       orderBy: { createdAt: "desc" },
     });
@@ -132,12 +132,10 @@ exports.getOrderById = async (req, res) => {
 
     // Қауіпсіздік үшін: егер админ емес болса және бұл оның өз тапсырысы болмаса — рұқсат бермеу
     if (req.user.role !== "ADMIN" && order.userId !== req.user.id) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Бұл ақпаратты көруге рұқсатыңыз жоқ",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Бұл ақпаратты көруге рұқсатыңыз жоқ",
+      });
     }
 
     res.status(200).json({ success: true, data: order });
