@@ -80,10 +80,10 @@ router.get("/:id", productController.getProductById);
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
- *         content:
- *           multipart/form-data:
- *             schema:
- *               type: object
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
  *             required:
  *               - name
  *               - price
