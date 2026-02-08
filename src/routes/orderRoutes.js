@@ -86,6 +86,12 @@ router.get(
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: integer
+ *           description: Пайдаланушының ID нөмірі
  *     responses:
  *       200:
  *         description: Тапсырыстар тізімі

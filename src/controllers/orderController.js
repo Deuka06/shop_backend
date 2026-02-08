@@ -68,31 +68,17 @@ exports.createOrder = async (req, res) => {
 // Клиент тек өзіне тиесілі тапсырыстарды көреді
 exports.getMyOrders = async (req, res) => {
   try {
-    // req.user.id мәні authenticate middleware-інен келеді
-    const userId = req.user.id;
+    // Егер query-де болса req.query.userId, әйтпесе токеннен req.user.id
+    const userId = req.query.userId ? Number(req.query.userId) : req.user.id;
 
     const orders = await prisma.order.findMany({
-      where: {
-        userId: userId, // Тек осы қолданушының заказдарын аламыз
-      },
-      include: {
-        items: true, // Заказ ішіндегі тауарларды бірге шығару
-      },
-      orderBy: {
-        createdAt: "desc", // Жаңаларын жоғары қою
-      },
+      where: { userId: userId },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
     });
-
-    res.status(200).json({
-      success: true,
-      count: orders.length,
-      data: orders,
-    });
+    res.status(200).json({ success: true, data: orders });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
