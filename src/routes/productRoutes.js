@@ -80,30 +80,30 @@ router.get("/:id", productController.getProductById);
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *           required:
- *             - name
- *             - price
- *           properties:
- *             name:
- *               type: string
- *               description: Өнім атауы
- *             description:
- *               type: string
- *               description: Өнім сипаттамасы
- *             price:
- *               type: number
- *               description: Өнім бағасы
- *             categoryId:
- *               type: integer
- *               description: Категория ID-сі
- *             image:
- *               type: string
- *               format: binary
- *               description: Өнім суреті (файл)
+ *         content:
+ *           multipart/form-data:
+ *             schema:
+ *               type: object
+ *             required:
+ *               - name
+ *               - price
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Өнім атауы
+ *               description:
+ *                 type: string
+ *                 description: Өнім сипаттамасы
+ *               price:
+ *                 type: number
+ *                 description: Өнім бағасы
+ *               categoryId:
+ *                 type: integer
+ *                 description: Категория ID-сі
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Өнім суреті (файл)
  *     responses:
  *       201:
  *         description: Өнім сәтті құрылды
