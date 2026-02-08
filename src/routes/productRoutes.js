@@ -80,27 +80,30 @@ router.get("/:id", productController.getProductById);
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
- *         content:
- *           multipart/form-data:  # JSON-нан multipart-қа өзгерттік
- *             schema:
- *               type: object
- *               required:
- *                 - name
- *                 - price
- *               properties:
- *                 name:
- *                   type: string
- *                   description: Өнім атауы
- *                 price:
- *                   type: number
- *                   description: Өнім бағасы
- *                 categoryId:
- *                   type: integer
- *                   description: Өнім категориясының ID-сі
- *                 image:
- *                   type: string
- *                   format: binary
- *                   description: Өнім суреті (файл)
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *           required:
+ *             - name
+ *             - price
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: Өнім атауы
+ *             description:
+ *               type: string
+ *               description: Өнім сипаттамасы
+ *             price:
+ *               type: number
+ *               description: Өнім бағасы
+ *             categoryId:
+ *               type: integer
+ *               description: Категория ID-сі
+ *             image:
+ *               type: string
+ *               format: binary
+ *               description: Өнім суреті (файл)
  *     responses:
  *       201:
  *         description: Өнім сәтті құрылды
@@ -108,8 +111,8 @@ router.get("/:id", productController.getProductById);
 router.post(
   "/",
   authenticate,
-  authorize("ADMIN"), // "USER"-ден "ADMIN"-ге өзгерткен дұрыс шығар?
-  upload.single("image"), // 'image' деген атпен келетін файлды қабылдау
+  authorize("ADMIN"),
+  upload.single("image"),
   [
     body("name").notEmpty().withMessage("Өнім атауын енгізіңіз"),
     body("price")
