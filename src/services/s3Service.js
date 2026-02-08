@@ -16,13 +16,18 @@ const upload = multer({
   storage: multerS3({
     s3: s3,
     bucket: process.env.S3_BUCKET,
-    acl: "public-read",
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: function (req, file, cb) {
-      const fileName = `products/${Date.now()}-${file.originalname}`;
+      // Файл атында қазақша әріптер немесе бос орын болса, қате беруі мүмкін
+      // Сондықтан файл атын тазалап алған дұрыс
+      const safeName = file.originalname
+        .replace(/[^a-z0-9.]/gi, "_")
+        .toLowerCase();
+      const fileName = `products/${Date.now()}-${safeName}`;
       cb(null, fileName);
     },
   }),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB шектеу
 });
 
 module.exports = upload;
