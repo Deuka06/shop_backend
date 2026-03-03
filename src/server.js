@@ -18,17 +18,32 @@ const app = express();
 // Middleware
 app.use(
   helmet({
-    contentSecurityPolicy: false,
-    crossOriginOpenerPolicy: false,
-    originAgentCluster: false,
+    contentSecurityPolicy: false, // Фронтенд пен Backend бөлек болғанда false тұрғаны ыңғайлы
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   }),
 );
 app.use(compression());
 
+// CORS - Production үшін рұқсаттар тізімі
+const allowedOrigins = [
+  "http://localhost:5173", // Локальді тексеру үшін
+  "http://qamkor-shop.kz", // Домен (http)
+  "https://qamkor-shop.kz", // Домен (https)
+  "http://46.247.41.196", // IP
+  "https://46.247.41.196", // IP https арқылы
+];
+
 // CORS - Swagger үшін кеңейтілген баптау
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      // origin жоқ болса (мысалы, Postman-нан келсе) немесе тізімде болса рұқсат беру
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS-қа рұқсат жоқ: " + origin));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
