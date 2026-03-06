@@ -27,8 +27,8 @@ app.use(compression());
 // CORS - Production үшін рұқсаттар тізімі
 const allowedOrigins = [
   "http://localhost:5173", // Локальді тексеру үшін
-  "http://qamkor-shop.kz", // Домен (http)
-  "https://qamkor-shop.kz", // Домен (https)
+  "http://qamkor.kz", // Домен (http)
+  "https://qamkor.kz", // Домен (https)
   "http://46.247.41.196", // IP
   "https://46.247.41.196", // IP https арқылы
 ];
