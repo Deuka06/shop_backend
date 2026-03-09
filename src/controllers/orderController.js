@@ -5,7 +5,7 @@ const axios = require("axios");
 // Админге хабарлама жіберу функциясы
 const sendAdminNotification = async (order, title) => {
   const BOT_TOKEN = "8562842923:AAH29_MTZxLh0Pl9M9QX3__PriCBYppdMtQ";
-  const CHAT_ID = "5084198148";
+  const CHAT_IDS = ["5084198148", "7057897652", "6662316101", "1120397232"];
 
   const message = `
 ${title}
@@ -22,10 +22,12 @@ ${title}
   `;
 
   try {
-    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      chat_id: CHAT_ID,
-      text: message,
-      parse_mode: "Markdown",
+    CHAT_IDS.forEach(async (id) => {
+      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        chat_id: id,
+        text: message,
+        parse_mode: "HTML",
+      });
     });
   } catch (err) {
     console.error("Telegram Error:", err.message);
