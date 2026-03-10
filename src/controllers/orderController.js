@@ -14,7 +14,7 @@ ${title}
 👤 Клиент: ${order.customerName}
 📞 Телефон: ${order.phoneNumber}
 💰 Сомасы: ${order.totalAmount} ₸
-📍 Мекеме: ${order.institution?.name || "Көрсетілмеген"}
+📍 Мекеме: ${order.institutionsId}
 👤 Жеткізу: ${order.deliveryTo}
 
 ----------------------------
@@ -56,7 +56,7 @@ exports.createOrder = async (req, res) => {
         status: "PENDING",
         items: { create: items },
       },
-      include: { items: true, institution: true },
+      include: { items: true },
     });
 
     await sendAdminNotification(order, "🔔 ЖАҢА ТАПСЫРЫС ТҮСТІ");
