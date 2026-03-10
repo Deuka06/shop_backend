@@ -1,6 +1,37 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { getAllInstitutions } = require('../utils/institutions');
+const axios = require("axios");
+const { getAllInstitutions } = require("../utils/institutions");
+
+const sendTelegramNotification = async (order) => {
+  const BOT_TOKEN = "8562842923:AAH29_MTZxLh0Pl9M9QX3__PriCBYppdMtQ";
+  const CHAT_IDS = ["5084198148", "7057897652", "6662316101", "1120397232"];
+
+  const message = `
+🚚 **ЖАҢА КУРЬЕР ТАПСЫРЫСЫ** 🚚
+---------------------------
+👤 **Клиент:** ${order.fullName}
+📞 **Телефон:** ${order.phoneNumber}
+📍 **Қайдан:** ${order.institution}
+🏁 **Қайда:** ${order.deliveryTo}
+🏠 **Мекенжай:** ${order.address}
+📝 **Сипаттама:** ${order.description || "Жоқ"}
+---------------------------
+🕒 ${new Date(order.createdAt).toLocaleString("ru-RU")}
+`;
+
+  try {
+    CHAT_IDS.forEach(async (id) => {
+      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        chat_id: id,
+        text: message,
+        parse_mode: "HTML",
+      });
+    });
+  } catch (error) {
+    console.error("Telegram notification error:", error.message);
+  }
+};
 
 // Жаңа курьер тапсырысын жасау
 exports.createCourierOrder = async (req, res, next) => {
@@ -18,7 +49,7 @@ exports.createCourierOrder = async (req, res, next) => {
     if (!fullName || !phoneNumber || !address || !institution || !deliveryTo) {
       return res.status(400).json({
         success: false,
-        message: 'Барлық міндетті өрістерді толтырыңыз',
+        message: "Барлық міндетті өрістерді толтырыңыз",
       });
     }
 
@@ -35,9 +66,11 @@ exports.createCourierOrder = async (req, res, next) => {
       },
     });
 
+    sendTelegramNotification(order);
+
     res.status(201).json({
       success: true,
-      message: 'Курьер тапсырысы сәтті жасалды',
+      message: "Курьер тапсырысы сәтті жасалды",
       data: order,
       orderId: order.id,
     });
@@ -101,10 +134,10 @@ exports.getAllCourierOrders = async (req, res, next) => {
 
     if (search) {
       where.OR = [
-        { fullName: { contains: search, mode: 'insensitive' } },
-        { phoneNumber: { contains: search, mode: 'insensitive' } },
-        { institution: { contains: search, mode: 'insensitive' } },
-        { deliveryTo: { contains: search, mode: 'insensitive' } },
+        { fullName: { contains: search, mode: "insensitive" } },
+        { phoneNumber: { contains: search, mode: "insensitive" } },
+        { institution: { contains: search, mode: "insensitive" } },
+        { deliveryTo: { contains: search, mode: "insensitive" } },
       ];
     }
 
@@ -113,7 +146,7 @@ exports.getAllCourierOrders = async (req, res, next) => {
       where,
       skip,
       take: parseInt(limit),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         user: {
           select: {
@@ -132,16 +165,16 @@ exports.getAllCourierOrders = async (req, res, next) => {
     const stats = {
       total,
       pending: await prisma.courierOrder.count({
-        where: { ...where, status: 'PENDING' },
+        where: { ...where, status: "PENDING" },
       }),
       processing: await prisma.courierOrder.count({
-        where: { ...where, status: 'PROCESSING' },
+        where: { ...where, status: "PROCESSING" },
       }),
       delivered: await prisma.courierOrder.count({
-        where: { ...where, status: 'DELIVERED' },
+        where: { ...where, status: "DELIVERED" },
       }),
       cancelled: await prisma.courierOrder.count({
-        where: { ...where, status: 'CANCELLED' },
+        where: { ...where, status: "CANCELLED" },
       }),
     };
 
@@ -183,7 +216,7 @@ exports.getCourierOrderById = async (req, res, next) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Тапсырыс табылмады',
+        message: "Тапсырыс табылмады",
       });
     }
 
@@ -202,12 +235,12 @@ exports.updateOrderStatus = async (req, res, next) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ['PENDING', 'PROCESSING', 'DELIVERED', 'CANCELLED'];
+    const validStatuses = ["PENDING", "PROCESSING", "DELIVERED", "CANCELLED"];
 
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Жарамсыз статус',
+        message: "Жарамсыз статус",
       });
     }
 
@@ -218,7 +251,7 @@ exports.updateOrderStatus = async (req, res, next) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Тапсырыс табылмады',
+        message: "Тапсырыс табылмады",
       });
     }
 
@@ -229,7 +262,7 @@ exports.updateOrderStatus = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Тапсырыс статусы жаңартылды',
+      message: "Тапсырыс статусы жаңартылды",
       data: updatedOrder,
     });
   } catch (error) {
@@ -249,7 +282,7 @@ exports.deleteCourierOrder = async (req, res, next) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Тапсырыс табылмады',
+        message: "Тапсырыс табылмады",
       });
     }
 
@@ -259,7 +292,7 @@ exports.deleteCourierOrder = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Тапсырыс сәтті жойылды',
+      message: "Тапсырыс сәтті жойылды",
     });
   } catch (error) {
     next(error);
@@ -272,7 +305,7 @@ exports.getMyCourierOrders = async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'Авторизация қажет',
+        message: "Авторизация қажет",
       });
     }
 
@@ -283,7 +316,7 @@ exports.getMyCourierOrders = async (req, res, next) => {
       where: { userId: req.user.id },
       skip,
       take: parseInt(limit),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     const total = await prisma.courierOrder.count({
