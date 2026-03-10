@@ -14,7 +14,7 @@ ${title}
 👤 Клиент: ${order.customerName}
 📞 Телефон: ${order.phoneNumber}
 💰 Сомасы: ${order.totalAmount} ₸
-📍 Мекеме: ${order.institutionsId}
+📍 Мекеме: ${order.institution}
 👤 Жеткізу: ${order.deliveryTo}
 
 ----------------------------

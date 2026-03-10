@@ -12,9 +12,9 @@ const sendTelegramNotification = async (order) => {
 ---------------------------
 👤 **Клиент:** ${order.fullName}
 📞 **Телефон:** ${order.phoneNumber}
-📍 **Қайдан:** ${order.institution}
-🏁 **Қайда:** ${order.deliveryTo}
 🏠 **Мекенжай:** ${order.address}
+📍 **Қайда:** ${order.institution}
+🏁 **Кімге:** ${order.deliveryTo}
 📝 **Сипаттама:** ${order.description || "Жоқ"}
 ---------------------------
 🕒 ${new Date(order.createdAt).toLocaleString("ru-RU")}
