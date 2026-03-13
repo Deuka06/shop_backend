@@ -43,8 +43,18 @@ exports.createOrder = async (req, res) => {
       institutionsId,
       deliveryTo,
       totalAmount,
-      items,
+      items, // Мұнда себеттегі барлық деректер (суретімен) келеді
     } = req.body;
+
+    // ✅ МӘСЕЛЕНІ ШЕШУ: Prisma тек схемада бар өрістерді ғана қабылдайды.
+    // Сондықтан 'image' немесе басқа артық өрістерді алып тастаймыз.
+    const cleanedItems = items.map((item) => ({
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      productId: item.id, // Егер схемада productId болса, осылай қалдырыңыз
+    }));
+
     const order = await prisma.order.create({
       data: {
         customerName,
@@ -52,9 +62,10 @@ exports.createOrder = async (req, res) => {
         institutionsId,
         deliveryTo,
         totalAmount,
-        userId: req.user.id, // Auth middleware-ден келеді
+        userId: req.user.id,
         status: "PENDING",
-        items: { create: items },
+        // ✅ items орнына тазартылған cleanedItems қолданамыз
+        items: { create: cleanedItems },
       },
       include: { items: true },
     });
@@ -62,6 +73,7 @@ exports.createOrder = async (req, res) => {
     await sendAdminNotification(order, "🔔 ЖАҢА ТАПСЫРЫС ТҮСТІ");
     res.status(201).json({ success: true, data: order });
   } catch (error) {
+    // Егер схемада қате болса, Prisma осы жерде error лақтырады
     res.status(500).json({ success: false, error: error.message });
   }
 };
